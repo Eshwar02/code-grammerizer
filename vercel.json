@@ -1,25 +1,9 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "backend/app.py",
-      "use": "@vercel/python",
-      "config": { "maxLambdaSize": "50mb" }
-    },
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
-    }
-  ],
-  "routes": [
-    { "src": "/auth(.*)",     "dest": "backend/app.py" },
-    { "src": "/projects(.*)", "dest": "backend/app.py" },
-    { "src": "/reviews(.*)",  "dest": "backend/app.py" },
-    { "src": "/reports(.*)",  "dest": "backend/app.py" },
-    { "src": "/lint(.*)",     "dest": "backend/app.py" },
-    { "src": "/suggest(.*)",  "dest": "backend/app.py" },
-    { "src": "/health",       "dest": "backend/app.py" },
-    { "src": "/(.*)",         "dest": "frontend/dist/$1" }
+  "buildCommand": "cd frontend && npm ci && npm run build",
+  "installCommand": "cd frontend && npm ci",
+  "outputDirectory": "frontend/dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
