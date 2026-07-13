@@ -1,0 +1,26 @@
+# Internal tooling
+backend/.agents/
+backend/.claude/
+backend/.mcp.json
+backend/skills-lock.json
+frontend/.claude/
+.claude/
+
+# Python
+backend/.env
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/venv/
+backend/uploads/
+backend/*.db
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# System
+.DS_Store
+*.log

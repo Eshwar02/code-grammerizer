@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { border-radius: 0 !important; }
+  body {
+    @apply bg-white text-ink-900 antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .dark body {
+    background-color: #0d0d14;
+    color: #e4e4ec;
+  }
+}
+
+@layer components {
+  /* Cards */
+  .card {
+    @apply bg-white border border-ink-200 p-5;
+  }
+  .card-flat {
+    @apply bg-ink-50 border border-ink-100 p-5;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-blue-400 hover:bg-blue-500 text-white font-semibold px-5 py-2.5
+           border border-blue-500 transition-colors text-sm
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply bg-white hover:bg-ink-50 text-ink-800 font-medium px-4 py-2.5
+           border border-ink-200 transition-colors text-sm;
+  }
+  .btn-lime {
+    @apply bg-lime-400 hover:bg-lime-500 text-ink-900 font-semibold px-5 py-2.5
+           border border-lime-500 transition-colors text-sm;
+  }
+
+  /* Inputs */
+  .input {
+    @apply bg-white border border-ink-200 px-3 py-2.5 text-ink-900
+           placeholder-ink-400 focus:outline-none focus:border-blue-400
+           focus:ring-1 focus:ring-blue-400 w-full text-sm transition-colors;
+  }
+  .select {
+    @apply input appearance-none cursor-pointer;
+  }
+
+  /* Badges */
+  .badge-high   { @apply bg-red-100   text-red-700   text-xs px-2 py-0.5 font-medium border border-red-200; }
+  .badge-medium { @apply bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 font-medium border border-yellow-200; }
+  .badge-low    { @apply bg-blue-50   text-blue-600  text-xs px-2 py-0.5 font-medium border border-blue-200; }
+  .badge-info   { @apply bg-ink-100   text-ink-600   text-xs px-2 py-0.5 font-medium border border-ink-200; }
+
+  /* Section divider */
+  .divider { @apply border-t border-ink-100 my-4; }
+
+  /* Stat box */
+  .stat-box {
+    @apply bg-white border border-ink-200 p-4 text-center;
+  }
+
+  /* Tag */
+  .tag {
+    @apply text-xs font-medium px-2 py-0.5 border;
+  }
+}
+
+/* ─── Dark mode overrides ─────────────────────────────────────────── */
+
+/* Component backgrounds & borders */
+.dark .card          { background-color: #16161f; border-color: #2a2a38; }
+.dark .card-flat     { background-color: #1c1c28; border-color: #2a2a38; }
+.dark .stat-box      { background-color: #16161f; border-color: #2a2a38; }
+.dark .divider       { border-color: #2a2a38; }
+
+/* Buttons */
+.dark .btn-ghost {
+  background-color: #1c1c28;
+  border-color: #3a3a50;
+  color: #d0d0e0;
+}
+.dark .btn-ghost:hover {
+  background-color: #24243a;
+}
+
+/* Inputs */
+.dark .input,
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1c1c28 !important;
+  border-color: #3a3a50 !important;
+  color: #e4e4ec !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: #5a5a78 !important; }
+.dark input:disabled { color: #4a4a60 !important; background-color: #13131c !important; }
+
+/* Navbars, borders */
+.dark nav { background-color: #0d0d14 !important; border-color: #2a2a38 !important; }
+
+/* Generic white backgrounds that aren't covered by .card */
+.dark .bg-white  { background-color: #16161f !important; }
+.dark .bg-ink-50 { background-color: #1c1c28 !important; }
+
+/* Borders */
+.dark .border-ink-100 { border-color: #22222e !important; }
+.dark .border-ink-200 { border-color: #2a2a38 !important; }
+
+/* ── Text colour remapping ──────────────────────────────────────────
+   ink-900 (#111118) → near-white  #e8e8f0
+   ink-800 (#1e1e28) → light       #d0d0e0
+   ink-700 (implied) → soft-white  #b8b8cc
+   ink-600 (#52525e) → mid-light   #9898b8
+   ink-400 (#9898a3) → muted       #6868880
+   ink-300 (implied) → dim         #555568
+*/
+.dark .text-ink-900 { color: #e8e8f0 !important; }
+.dark .text-ink-800 { color: #d0d0e0 !important; }
+.dark .text-ink-700 { color: #b8b8cc !important; }
+.dark .text-ink-600 { color: #9898b8 !important; }
+.dark .text-ink-400 { color: #686880 !important; }
+.dark .text-ink-300 { color: #555568 !important; }
+
+/* Headings & bold text inherit well once body is set */
+.dark h1, .dark h2, .dark h3, .dark h4 { color: #e8e8f0; }
+.dark p  { color: #b8b8cc; }
+.dark label { color: #9898b8; }
+
+/* Code & mono elements */
+.dark pre, .dark code { background-color: #1c1c28 !important; color: #d0d0e0 !important; }
+
+/* Hover rows in lists */
+.dark .hover\:bg-ink-50:hover { background-color: #1c1c28 !important; }
+.dark .hover\:bg-ink-100:hover { background-color: #22222e !important; }
+
+/* Shadow dropdowns */
+.dark .shadow-lg {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+/* Divide lines */
+.dark .divide-ink-100 > * + * { border-color: #22222e !important; }
+.dark .divide-y > * + * { border-color: #22222e !important; }
+
+/* Score/badge colours stay bright — no override needed */
+
+/* Section collapse buttons */
+.dark .hover\:bg-ink-100:hover { background-color: #22222e !important; }
