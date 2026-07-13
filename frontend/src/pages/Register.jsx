@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
@@ -41,6 +41,12 @@ function StrengthBar({ password }) {
 }
 
 export default function Register() {
+  useEffect(() => {
+    const wasDark = document.documentElement.classList.contains('dark')
+    document.documentElement.classList.remove('dark')
+    return () => { if (wasDark) document.documentElement.classList.add('dark') }
+  }, [])
+
   const { login } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
