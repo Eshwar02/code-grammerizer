@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import { projectsApi, reviewsApi, lintApi, suggestApi } from '../services/api'
 import toast from 'react-hot-toast'
-import { Upload as UploadIcon, FileCode, Code, GitBranch, ArrowLeft, AlertCircle, AlertTriangle, Info, CheckCircle, Loader2, Wand2, Copy, ChevronDown, ChevronUp } from 'lucide-react'
+import { Upload as UploadIcon, FileCode, Code, GitBranch, Lock, ArrowLeft, AlertCircle, AlertTriangle, Info, CheckCircle, Loader2, Wand2, Copy, ChevronDown, ChevronUp } from 'lucide-react'
 import CodeEditor from '../components/CodeEditor'
 
 const LANGUAGES = ['python', 'javascript', 'typescript', 'java', 'cpp', 'c', 'go']
@@ -168,6 +168,7 @@ export default function Upload() {
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ project_name: '', code: '', language: 'python' })
   const [repo, setRepo] = useState({ repo_url: '', branch: '', token: '' })
+  const [showToken, setShowToken] = useState(false)
   const [file, setFile] = useState(null)
   const [lintFindings, setLintFindings] = useState([])
   const [lintLoading, setLintLoading] = useState(false)
@@ -270,24 +271,37 @@ export default function Upload() {
             <div>
               <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 block">Git Repo URL</label>
               <input className="input font-mono text-sm" value={repo.repo_url}
+                autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false"
+                name="git-repo-url" type="url" inputMode="url"
                 onChange={(e) => setRepo({ ...repo, repo_url: e.target.value })}
                 placeholder="https://github.com/user/repo" />
               <p className="text-ink-300 text-xs mt-1">Small projects only — up to 40 source files pulled via a shallow clone.</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 block">Branch <span className="text-ink-300 normal-case">(optional)</span></label>
+              <input className="input" value={repo.branch} autoComplete="off"
+                onChange={(e) => setRepo({ ...repo, branch: e.target.value })}
+                placeholder="main (leave blank for default)" />
+            </div>
+
+            {/* Token hidden by default — confidential, only for private repos */}
+            {!showToken ? (
+              <button type="button" onClick={() => setShowToken(true)}
+                className="flex items-center gap-1.5 text-xs text-ink-400 hover:text-ink-700">
+                <Lock size={12} /> Private repo? Add a secured access token
+              </button>
+            ) : (
               <div>
-                <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 block">Branch <span className="text-ink-300 normal-case">(optional)</span></label>
-                <input className="input" value={repo.branch}
-                  onChange={(e) => setRepo({ ...repo, branch: e.target.value })}
-                  placeholder="main" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 block">Token <span className="text-ink-300 normal-case">(private repos)</span></label>
-                <input className="input" type="password" value={repo.token}
+                <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                  <Lock size={12} /> Access Token <span className="text-ink-300 normal-case">(confidential — private repos only)</span>
+                </label>
+                <input className="input" type="password" value={repo.token} autoComplete="new-password"
                   onChange={(e) => setRepo({ ...repo, token: e.target.value })}
                   placeholder="ghp_…" />
+                <button type="button" onClick={() => { setShowToken(false); setRepo({ ...repo, token: '' }) }}
+                  className="text-xs text-ink-300 hover:text-ink-500 mt-1">Hide</button>
               </div>
-            </div>
+            )}
           </div>
         ) : mode === 'snippet' ? (
           <div className="card space-y-4">

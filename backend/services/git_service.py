@@ -4,11 +4,12 @@ Public repos need no auth. Private repos use settings.github_token (or a token
 passed per-request), injected into the clone URL. Everything runs in a temp dir
 that is always cleaned up.
 """
-import re
+import os
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 from config import (
     ALLOWED_EXTENSIONS,
@@ -25,18 +26,28 @@ LANG_MAP = {
     ".cpp": "cpp", ".c": "c", ".go": "go",
 }
 
-_URL_RE = re.compile(r"^https?://[\w.-]+/[\w.-]+/[\w.-]+?(?:\.git)?/?$")
-
-
 class RepoError(Exception):
     pass
 
 
-def _auth_url(url: str, token: str) -> str:
-    """Inject a token into an https git URL for private repos."""
-    if token and url.startswith("https://") and "@" not in url.split("//", 1)[1]:
-        return url.replace("https://", f"https://{token}@", 1)
-    return url
+def _prepare_url(url: str, token: str) -> str:
+    """Validate + normalise the clone URL.
+
+    Always strips any credentials the user (or browser autofill) embedded in the
+    URL, so a public clone is truly anonymous and never triggers a password
+    prompt. A token, if given, is the only credential re-attached (private repos).
+    """
+    parts = urlsplit(url.strip())
+    if parts.scheme not in ("http", "https") or not parts.hostname:
+        raise RepoError("Invalid repo URL. Use an https git URL, e.g. https://github.com/user/repo")
+    # need at least owner/repo in the path
+    segs = [s for s in parts.path.split("/") if s]
+    if len(segs) < 2:
+        raise RepoError("Invalid repo URL — expected https://host/owner/repo")
+
+    host = parts.hostname + (f":{parts.port}" if parts.port else "")
+    netloc = f"{token}@{host}" if token else host   # drop any user-supplied userinfo
+    return urlunsplit((parts.scheme, netloc, parts.path, "", ""))
 
 
 def _dominant_language(files: list[dict]) -> str:
@@ -54,23 +65,25 @@ def pull_repo(repo_url: str, branch: str = "", token: str = "") -> dict:
     Returns: {files: [{path, content, language}], language, truncated, skipped}
     Raises RepoError on bad URL / clone failure / no reviewable files.
     """
-    repo_url = (repo_url or "").strip()
-    if not _URL_RE.match(repo_url):
-        raise RepoError("Invalid repo URL. Use an https git URL, e.g. https://github.com/user/repo")
+    token = (token or settings.github_token or "").strip()
+    clone_url = _prepare_url(repo_url or "", token)
 
-    token = token or settings.github_token
+    # Never let git block on an interactive credential/password prompt — fail fast.
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GIT_ASKPASS": "true"}
+
     tmp = tempfile.mkdtemp(prefix="repopull_")
     try:
-        cmd = ["git", "clone", "--depth", "1", "--single-branch"]
+        cmd = ["git", "-c", "credential.helper=", "clone", "--depth", "1", "--single-branch"]
         if branch:
             cmd += ["--branch", branch]
-        cmd += [_auth_url(repo_url, token), tmp]
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+        cmd += [clone_url, tmp]
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=90, env=env)
         if proc.returncode != 0:
             err = (proc.stderr or "clone failed").strip().splitlines()[-1]
-            # never leak an injected token back to the client
-            if token:
+            if token:  # never leak the token back to the client
                 err = err.replace(token, "***")
+            if "could not read" in err.lower() or "authentication failed" in err.lower():
+                err = "authentication required — is this a private repo? add a token, or check the URL"
             raise RepoError(f"git clone failed: {err}")
 
         root = Path(tmp)
