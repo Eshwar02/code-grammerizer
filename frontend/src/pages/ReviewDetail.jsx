@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { reviewsApi, reportsApi, suggestApi, lintApi } from '../services/api'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { reviewsApi, reportsApi, suggestApi, lintApi, workspaceApi } from '../services/api'
 import toast from 'react-hot-toast'
-import { ArrowLeft, Download, FileText, AlertTriangle, ShieldAlert, Zap, Code2, BookOpen, BarChart3, Wand2, Copy, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
+import { ArrowLeft, Download, FileText, AlertTriangle, ShieldAlert, Zap, Code2, BookOpen, BarChart3, Wand2, Copy, ChevronDown, ChevronUp, Loader2, Users } from 'lucide-react'
 import ScoreRing from '../components/ScoreRing'
 import CodeEditor from '../components/CodeEditor'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts'
@@ -160,11 +160,13 @@ function Section({ icon, title, children, defaultOpen = true }) {
 
 export default function ReviewDetail() {
   const { reviewId } = useParams()
+  const navigate = useNavigate()
   const [review, setReview] = useState(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState('overview')
   const [editableCode, setEditableCode] = useState('')
   const [rerunLoading, setRerunLoading] = useState(false)
+  const [collabLoading, setCollabLoading] = useState(false)
   const [liveLintFindings, setLiveLintFindings] = useState([])
   const [pdfMenuOpen, setPdfMenuOpen] = useState(false)
   const debounceRef = useRef(null)
@@ -261,6 +263,22 @@ export default function ReviewDetail() {
       toast.error('Re-run failed')
     } finally {
       setRerunLoading(false)
+    }
+  }
+
+  // Turn the current file into a live team workspace, seeded with the edited code.
+  const startCollab = async () => {
+    setCollabLoading(true)
+    try {
+      const { data: ws } = await workspaceApi.create(`${review.project_name} (live)`)
+      const name = `${review.project_name || 'main'}.${(review.language || 'py') === 'python' ? 'py' : review.language}`
+      await workspaceApi.createFile(ws.id, name, review.language || 'python', editableCode || '')
+      toast.success('Collaboration room ready — invite your team!')
+      navigate(`/workspace/${ws.id}`)
+    } catch {
+      toast.error('Could not start collaboration')
+    } finally {
+      setCollabLoading(false)
     }
   }
 
@@ -568,14 +586,25 @@ export default function ReviewDetail() {
         <div className="space-y-3">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-ink-400">Edit code below and click Re-Run Analysis to analyze changes</span>
-            <button
-              onClick={handleRerun}
-              disabled={rerunLoading}
-              className="btn-lime flex items-center gap-1.5 text-sm"
-            >
-              {rerunLoading ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />}
-              {rerunLoading ? 'Running…' : 'Re-Run Analysis'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={startCollab}
+                disabled={collabLoading}
+                className="btn-ghost flex items-center gap-1.5 text-sm"
+                title="Open this file in a real-time team workspace"
+              >
+                {collabLoading ? <Loader2 size={13} className="animate-spin" /> : <Users size={13} />}
+                {collabLoading ? 'Starting…' : 'Collaborate'}
+              </button>
+              <button
+                onClick={handleRerun}
+                disabled={rerunLoading}
+                className="btn-lime flex items-center gap-1.5 text-sm"
+              >
+                {rerunLoading ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />}
+                {rerunLoading ? 'Running…' : 'Re-Run Analysis'}
+              </button>
+            </div>
           </div>
           <div className="border border-ink-200">
             <CodeEditor

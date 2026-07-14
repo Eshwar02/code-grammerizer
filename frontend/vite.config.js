@@ -13,6 +13,8 @@ export default defineConfig({
       '/lint':     'http://localhost:8000',
       '/suggest':  'http://localhost:8000',
       '/health':   'http://localhost:8000',
+      '/workspaces': 'http://localhost:8000',
+      '/ws':       { target: 'ws://localhost:8000', ws: true },
     },
   },
 })
