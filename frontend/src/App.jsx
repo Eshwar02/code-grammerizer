@@ -11,6 +11,9 @@ import Upload from './pages/Upload'
 import ProjectDetail from './pages/ProjectDetail'
 import ReviewDetail from './pages/ReviewDetail'
 import Profile from './pages/Profile'
+import Workspaces from './pages/Workspaces'
+import WorkspaceDetail from './pages/WorkspaceDetail'
+import JoinWorkspace from './pages/JoinWorkspace'
 
 export default function App() {
   return (
@@ -26,6 +29,9 @@ export default function App() {
           <Route path="/project/:projectId" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
           <Route path="/review/:reviewId" element={<ProtectedRoute><ReviewDetail /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/workspaces" element={<ProtectedRoute><Workspaces /></ProtectedRoute>} />
+          <Route path="/workspace/:id" element={<ProtectedRoute><WorkspaceDetail /></ProtectedRoute>} />
+          <Route path="/join/:code" element={<ProtectedRoute><JoinWorkspace /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>

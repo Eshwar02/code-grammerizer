@@ -63,4 +63,21 @@ export const suggestApi = {
   code: (code, language, focus = '') => api.post('/suggest/code', { code, language, focus }),
 }
 
+export const workspaceApi = {
+  list: () => api.get('/workspaces/'),
+  create: (name) => api.post('/workspaces/', { name }),
+  get: (id) => api.get(`/workspaces/${id}`),
+  remove: (id) => api.delete(`/workspaces/${id}`),
+  invite: (id, email, role = 'editor') => api.post(`/workspaces/${id}/invite`, { email, role }),
+  removeMember: (id, userId) => api.delete(`/workspaces/${id}/members/${userId}`),
+  toggleShare: (id) => api.post(`/workspaces/${id}/share`),
+  join: (code) => api.post('/workspaces/join', { code }),
+  createFile: (id, name, language) => api.post(`/workspaces/${id}/files`, { name, language }),
+  getFile: (id, fileId) => api.get(`/workspaces/${id}/files/${fileId}`),
+  saveFile: (id, fileId, ydoc_snapshot, content) =>
+    api.put(`/workspaces/${id}/files/${fileId}`, { ydoc_snapshot, content }),
+  deleteFile: (id, fileId) => api.delete(`/workspaces/${id}/files/${fileId}`),
+  changes: (id) => api.get(`/workspaces/${id}/changes`),
+}
+
 export default api

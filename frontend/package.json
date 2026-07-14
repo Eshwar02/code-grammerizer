@@ -19,7 +19,11 @@
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^6.23.1",
     "react-syntax-highlighter": "^15.5.0",
-    "recharts": "^2.12.7"
+    "recharts": "^2.12.7",
+    "y-indexeddb": "^9.0.12",
+    "y-monaco": "^0.1.6",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.31"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

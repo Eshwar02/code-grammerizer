@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import auth, upload, review, report, lint, suggest
+from routes import auth, upload, review, report, lint, suggest, workspace, collab
 
 app = FastAPI(title="Code-Grammerizer", version="1.0.0")
 
@@ -26,6 +26,8 @@ app.include_router(review.router)
 app.include_router(report.router)
 app.include_router(lint.router)
 app.include_router(suggest.router)
+app.include_router(workspace.router)
+app.include_router(collab.router)
 
 
 @app.get("/health")
