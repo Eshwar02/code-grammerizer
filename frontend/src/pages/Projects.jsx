@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { projectsApi } from '../services/api'
 import { useDialog } from '../components/Dialog'
 import toast from 'react-hot-toast'
-import { FolderGit2, GitBranch, Plus, ChevronRight, ChevronDown, FileCode, Calendar, Trash2, Loader2, ExternalLink } from 'lucide-react'
+import { FolderGit2, GitBranch, Plus, ChevronRight, ChevronDown, FileCode, Calendar, Trash2, ExternalLink } from 'lucide-react'
+import NeonLoader from '../components/NeonLoader'
 
 export default function Projects() {
   const dialog = useDialog()
@@ -57,7 +58,7 @@ export default function Projects() {
       </div>
 
       {loading ? (
-        <div className="text-center text-ink-400 py-20 text-sm">Loading…</div>
+        <NeonLoader label="Loading projects…" className="py-16" />
       ) : projects.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-ink-200">
           <FolderGit2 size={28} className="mx-auto mb-3 text-ink-300" />
@@ -106,7 +107,7 @@ export default function Projects() {
               {open === p.id && (
                 <div className="border-t border-ink-100 bg-ink-50/50 px-4 py-2">
                   {filesLoading && !files[p.id] ? (
-                    <div className="flex items-center gap-2 text-xs text-ink-400 py-2"><Loader2 size={12} className="animate-spin" /> Loading files…</div>
+                    <div className="flex items-center gap-2 text-xs text-ink-400 py-2"><NeonLoader inline width={44} label="" /> Loading files…</div>
                   ) : (
                     <div className="grid grid-cols-2 gap-x-6 gap-y-0.5 py-1">
                       {(files[p.id] || []).map((f) => (

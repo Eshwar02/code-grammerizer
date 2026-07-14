@@ -5,6 +5,7 @@ import { projectsApi, reviewsApi, lintApi, suggestApi } from '../services/api'
 import toast from 'react-hot-toast'
 import { Upload as UploadIcon, FileCode, Code, GitBranch, Lock, ArrowLeft, AlertCircle, AlertTriangle, Info, CheckCircle, Loader2, Wand2, Copy, ChevronDown, ChevronUp } from 'lucide-react'
 import CodeEditor from '../components/CodeEditor'
+import NeonLoader from '../components/NeonLoader'
 
 const LANGUAGES = ['python', 'javascript', 'typescript', 'java', 'cpp', 'c', 'go']
 
@@ -98,7 +99,7 @@ function SuggestionsPanel({ code, language }) {
         />
         <button onClick={run} disabled={loading}
           className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5">
-          {loading ? <Loader2 size={11} className="animate-spin" /> : <Wand2 size={11} />}
+          {loading ? <NeonLoader inline width={34} label="" /> : <Wand2 size={11} />}
           {loading ? 'Analysing…' : 'Suggest'}
         </button>
         {result && (
@@ -348,6 +349,7 @@ export default function Upload() {
         )}
 
         <button type="submit" className="btn-lime w-full flex items-center justify-center gap-2" disabled={loading}>
+          {loading && <NeonLoader inline width={40} label="" />}
           {loading ? 'Submitting…' : '▶  Analyse Code'}
         </button>
       </form>

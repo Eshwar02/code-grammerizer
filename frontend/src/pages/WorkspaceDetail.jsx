@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { createCollab, colorFor } from '../services/collab'
 import CollabEditor from '../components/CollabEditor'
 import { useDialog } from '../components/Dialog'
+import NeonLoader from '../components/NeonLoader'
 import toast from 'react-hot-toast'
 import { ArrowLeft, Plus, GitBranch, File, Trash2, Users, Link2, Wifi, WifiOff, Check, History, X } from 'lucide-react'
 
@@ -153,7 +154,7 @@ export default function WorkspaceDetail() {
     setCopied(true); setTimeout(() => setCopied(false), 1500)
   }
 
-  if (!ws) return <div className="max-w-6xl mx-auto px-6 py-10 text-sm text-ink-400">Loading…</div>
+  if (!ws) return <div className="max-w-6xl mx-auto px-6 py-20"><NeonLoader label="Loading workspace…" /></div>
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-6">

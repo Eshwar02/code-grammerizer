@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { reviewsApi } from '../services/api'
 import toast from 'react-hot-toast'
-import { ArrowLeft, RefreshCw, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
+import NeonLoader from '../components/NeonLoader'
 
 const scoreColor = (s) => s >= 75 ? 'text-lime-500' : s >= 50 ? 'text-yellow-500' : 'text-red-500'
 
@@ -35,11 +36,10 @@ export default function ProjectDetail() {
       </div>
 
       {loading ? (
-        <div className="text-center text-ink-400 py-20 text-sm">Loading…</div>
+        <NeonLoader label="Loading review history…" className="py-16" />
       ) : reviews.length === 0 ? (
         <div className="border border-ink-200 p-12 text-center">
-          <RefreshCw size={22} className="mx-auto mb-3 text-blue-400 animate-spin" />
-          <p className="text-ink-600 text-sm font-medium">Analysis in progress</p>
+          <NeonLoader label="Analysis in progress" width={280} />
           <p className="text-ink-400 text-xs mt-1">Auto-refreshing every 4 seconds</p>
         </div>
       ) : (

@@ -4,6 +4,7 @@ import { workspaceApi } from '../services/api'
 import { useDialog } from '../components/Dialog'
 import toast from 'react-hot-toast'
 import { Plus, Users, ChevronRight, Trash2, LogIn } from 'lucide-react'
+import NeonLoader from '../components/NeonLoader'
 
 export default function Workspaces() {
   const dialog = useDialog()
@@ -72,7 +73,7 @@ export default function Workspaces() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-ink-400">Loading…</p>
+        <NeonLoader label="Loading workspaces…" className="py-16" />
       ) : workspaces.length === 0 ? (
         <p className="text-sm text-ink-400">No workspaces yet. Create one above to start collaborating.</p>
       ) : (

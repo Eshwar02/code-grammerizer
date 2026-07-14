@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { ArrowLeft, Download, FileText, AlertTriangle, ShieldAlert, Zap, Code2, BookOpen, BarChart3, Wand2, Copy, ChevronDown, ChevronUp, Loader2, Users } from 'lucide-react'
 import ScoreRing from '../components/ScoreRing'
 import CodeEditor from '../components/CodeEditor'
+import NeonLoader from '../components/NeonLoader'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts'
 
 const SEVERITY_BADGE = { high: 'badge-high', medium: 'badge-medium', low: 'badge-low', info: 'badge-info' }
@@ -85,7 +86,7 @@ function CodeSuggestionsPanel({ code, language }) {
         />
         <button onClick={run} disabled={loading}
           className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5">
-          {loading ? <Loader2 size={11} className="animate-spin" /> : <Wand2 size={11} />}
+          {loading ? <NeonLoader inline width={34} label="" /> : <Wand2 size={11} />}
           {loading ? 'Analysing…' : 'Suggest'}
         </button>
         {result && (
@@ -282,7 +283,7 @@ export default function ReviewDetail() {
     }
   }
 
-  if (loading) return <div className="text-center text-ink-400 py-20 text-sm">Loading…</div>
+  if (loading) return <div className="py-20"><NeonLoader label="Loading review…" /></div>
   if (!review)  return <div className="text-center text-red-500 py-20 text-sm">Review not found</div>
 
   const ai = review.ai_review || {}
@@ -601,7 +602,7 @@ export default function ReviewDetail() {
                 disabled={rerunLoading}
                 className="btn-lime flex items-center gap-1.5 text-sm"
               >
-                {rerunLoading ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />}
+                {rerunLoading ? <NeonLoader inline width={38} label="" /> : <Zap size={13} />}
                 {rerunLoading ? 'Running…' : 'Re-Run Analysis'}
               </button>
             </div>

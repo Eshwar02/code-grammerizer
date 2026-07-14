@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useDialog } from '../components/Dialog'
 import toast from 'react-hot-toast'
 import { Plus, Search, Trash2, ChevronRight, Calendar, Filter, FolderGit2, FileCode } from 'lucide-react'
+import NeonLoader from '../components/NeonLoader'
 
 const scoreColor = (s) => s >= 75 ? 'text-lime-500' : s >= 50 ? 'text-yellow-500' : 'text-red-500'
 const scoreBg   = (s) => s >= 75 ? 'bg-lime-400'  : s >= 50 ? 'bg-yellow-400'   : 'bg-red-400'
@@ -111,7 +112,7 @@ export default function Dashboard() {
 
       {/* List */}
       {loading ? (
-        <div className="text-center text-ink-400 py-20 text-sm">Loading…</div>
+        <NeonLoader label="Loading your reviews…" className="py-16" />
       ) : reviews.length === 0 ? (
         <div className="text-center py-20 border border-dashed border-ink-200">
           <p className="text-ink-400 text-sm mb-4">No reviews yet</p>
