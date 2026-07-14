@@ -140,7 +140,7 @@ Relay benchmarked with a concurrent WebSocket harness (`backend/tests/load_test_
 | **Editor** | Monaco (VSCode engine) |
 | **Realtime** | Yjs (CRDT) · `y-websocket` · `y-monaco` · `y-indexeddb` |
 | **Backend** | FastAPI (Python 3.11) · WebSockets |
-| **AI** | Cerebras (`llama-3.3-70b`) |
+| **AI** | Cerebras (`gpt-oss-120b`) |
 | **Database** | Supabase (PostgreSQL + RLS) |
 | **Static Analysis** | Pylint · Bandit · Radon |
 | **Reports** | ReportLab (PDF) |

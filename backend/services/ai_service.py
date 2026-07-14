@@ -4,7 +4,9 @@ from config import settings
 
 client = Cerebras(api_key=settings.cerebras_api_key)
 
-MODEL = "llama-3.3-70b"
+MODEL = "gpt-oss-120b"
+# gpt-oss is a reasoning model; keep reasoning light so tokens go to the JSON answer.
+REASONING_EFFORT = "low"
 
 REVIEW_PROMPT = """You are a Senior Software Engineer conducting a thorough code review.
 
@@ -68,6 +70,7 @@ def _parse_json(raw: str) -> dict:
 def ai_review_code(code: str, language: str = "python") -> dict:
     resp = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort=REASONING_EFFORT,
         max_tokens=4096,
         messages=[
             {"role": "system", "content": REVIEW_PROMPT},
@@ -81,6 +84,7 @@ def suggest_code(code: str, language: str = "python", focus: str = "") -> dict:
     focus_text = f"\nFocus on: {focus}" if focus else ""
     resp = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort=REASONING_EFFORT,
         max_tokens=4096,
         messages=[
             {"role": "system", "content": SUGGEST_PROMPT},
@@ -93,6 +97,7 @@ def suggest_code(code: str, language: str = "python", focus: str = "") -> dict:
 def generate_documentation(code: str, language: str = "python") -> dict:
     resp = client.chat.completions.create(
         model=MODEL,
+        reasoning_effort=REASONING_EFFORT,
         max_tokens=2048,
         messages=[
             {"role": "system", "content": DOC_PROMPT},
@@ -117,7 +122,8 @@ Return only valid JSON."""
 def generate_profile_insight(stats: dict) -> dict:
     resp = client.chat.completions.create(
         model=MODEL,
-        max_tokens=512,
+        reasoning_effort=REASONING_EFFORT,
+        max_tokens=1500,
         messages=[
             {"role": "system", "content": PROFILE_PROMPT},
             {"role": "user", "content": f"User stats: {json.dumps(stats)}"},
