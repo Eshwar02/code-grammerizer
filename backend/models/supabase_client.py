@@ -6,5 +6,8 @@ _client: Client | None = None
 def get_supabase() -> Client:
     global _client
     if _client is None:
-        _client = create_client(settings.supabase_url, settings.supabase_anon_key)
+        # Prefer the service_role key (bypasses RLS). Fall back to anon so the
+        # backend keeps working if the service key is not configured yet.
+        key = settings.supabase_service_key or settings.supabase_anon_key
+        _client = create_client(settings.supabase_url, key)
     return _client
