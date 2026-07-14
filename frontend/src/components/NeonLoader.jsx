@@ -4,6 +4,12 @@ import { useEffect, useRef } from 'react'
 // holds, erases, and loops. Ported from the original vanilla-JS/SVG version.
 const PATH_D = "M 60 180 C 70 220, 95 262, 130 268 C 168 274, 195 240, 222 190 C 250 138, 285 72, 330 58 C 372 46, 402 68, 398 96 C 372 78, 330 82, 305 112 C 280 142, 282 182, 312 196 C 342 210, 382 196, 398 160 C 412 128, 404 96, 398 96 C 420 116, 432 160, 424 208 C 419 238, 408 268, 396 296 C 390 276, 378 258, 372 252 C 384 258, 412 262, 444 254 C 480 245, 520 230, 556 210 C 588 192, 614 168, 630 140"
 
+// Brand blue #4361EE with lighter tints for the mid + bright-core strokes.
+const C_GLOW = '#4361EE'
+const C_MAIN = '#5B78F0'
+const C_CORE = '#E5EAFF'
+const GLITTER = ['#ffffff', '#A5B4FF', '#4361EE']
+
 export default function NeonLoader({ label = 'Loading…', width = 240, inline = false, className = '' }) {
   const mainRef = useRef(null)
   const glowRef = useRef(null)
@@ -35,7 +41,7 @@ export default function NeonLoader({ label = 'Loading…', width = 240, inline =
       for (let i = 0; i < n; i++) {
         const el = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
         el.setAttribute('r', 0.8 + Math.random() * 1.8)
-        el.setAttribute('fill', Math.random() < 0.35 ? '#ffffff' : (Math.random() < 0.5 ? '#7df3ff' : '#38bdf8'))
+        el.setAttribute('fill', Math.random() < 0.35 ? GLITTER[0] : (Math.random() < 0.5 ? GLITTER[1] : GLITTER[2]))
         glitterLayer.appendChild(el)
         particles.push({
           el, born: now, life: 500 + Math.random() * 600,
@@ -104,9 +110,9 @@ export default function NeonLoader({ label = 'Loading…', width = 240, inline =
     <svg width={width} viewBox="0 0 680 340"
       style={{ display: inline ? 'inline-block' : 'block', overflow: 'visible', verticalAlign: 'middle' }}
       aria-hidden="true">
-      <path ref={glowRef} {...common} stroke="#22d3ee" strokeWidth="9" opacity="0.22" />
-      <path ref={mainRef} {...common} stroke="#38e5ff" strokeWidth="3" />
-      <path ref={coreRef} {...common} stroke="#d8fbff" strokeWidth="1.2" />
+      <path ref={glowRef} {...common} stroke={C_GLOW} strokeWidth="9" opacity="0.22" />
+      <path ref={mainRef} {...common} stroke={C_MAIN} strokeWidth="3" />
+      <path ref={coreRef} {...common} stroke={C_CORE} strokeWidth="1.2" />
       <g ref={glitterRef} />
     </svg>
   )
