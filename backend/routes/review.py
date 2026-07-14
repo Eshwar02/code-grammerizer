@@ -101,10 +101,11 @@ def trigger_review(project_id: int, background_tasks: BackgroundTasks, current_u
 def all_my_reviews(search: str = "", min_score: int = 0, max_score: int = 100,
                    language: str = "", current_user: dict = Depends(get_current_user)):
     sb = get_supabase()
-    projects = sb.table("projects").select("id, project_name, language").eq("user_id", current_user["id"]).execute()
+    projects = sb.table("projects").select("id, project_name, language, upload_type, file_count").eq("user_id", current_user["id"]).execute()
     project_ids = [p["id"] for p in projects.data]
     project_map = {p["id"]: p["project_name"] for p in projects.data}
     language_map = {p["id"]: p.get("language", "") for p in projects.data}
+    meta_map = {p["id"]: {"upload_type": p.get("upload_type"), "file_count": p.get("file_count")} for p in projects.data}
     if not project_ids:
         return []
 
@@ -119,7 +120,7 @@ def all_my_reviews(search: str = "", min_score: int = 0, max_score: int = 100,
                 continue
         if language and language_map.get(r["project_id"], "").lower() != language.lower():
             continue
-        result.append({**r, "project_name": pname})
+        result.append({**r, "project_name": pname, **meta_map.get(r["project_id"], {})})
     return result
 
 

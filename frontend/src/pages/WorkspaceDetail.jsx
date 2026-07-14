@@ -4,6 +4,7 @@ import { workspaceApi } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
 import { createCollab, colorFor } from '../services/collab'
 import CollabEditor from '../components/CollabEditor'
+import { useDialog } from '../components/Dialog'
 import toast from 'react-hot-toast'
 import { ArrowLeft, Plus, GitBranch, File, Trash2, Users, Link2, Wifi, WifiOff, Check, History, X } from 'lucide-react'
 
@@ -12,6 +13,7 @@ const LANGS = ['python', 'javascript', 'typescript', 'java', 'cpp', 'go']
 export default function WorkspaceDetail() {
   const { id } = useParams()
   const { user } = useAuth()
+  const dialog = useDialog()
   const [ws, setWs] = useState(null)
   const [activeFile, setActiveFile] = useState(null)   // {id, name, language}
   const [collab, setCollab] = useState(null)
@@ -100,7 +102,7 @@ export default function WorkspaceDetail() {
   }
 
   const addFile = async () => {
-    const name = prompt('File name (e.g. main.py)')
+    const name = await dialog.prompt({ title: 'New file', label: 'File name', placeholder: 'main.py', required: true, confirmText: 'Create' })
     if (!name) return
     const ext = name.split('.').pop()
     const language = { py: 'python', js: 'javascript', ts: 'typescript', java: 'java', cpp: 'cpp', c: 'cpp', go: 'go' }[ext] || 'python'
@@ -112,9 +114,9 @@ export default function WorkspaceDetail() {
   }
 
   const importRepo = async () => {
-    const repo_url = prompt('Git repo URL (https://github.com/user/repo)')
+    const repo_url = await dialog.prompt({ title: 'Import a git repo', label: 'Repository URL', placeholder: 'https://github.com/user/repo', required: true, confirmText: 'Import' })
     if (!repo_url) return
-    const branch = prompt('Branch (blank = default)') || ''
+    const branch = (await dialog.prompt({ title: 'Branch', label: 'Branch (optional)', placeholder: 'leave blank for default' })) || ''
     const t = toast.loading('Pulling repo…')
     try {
       const { data } = await workspaceApi.importRepo(id, repo_url.trim(), branch.trim())
@@ -127,7 +129,7 @@ export default function WorkspaceDetail() {
 
   const removeFile = async (f, e) => {
     e.stopPropagation()
-    if (!confirm(`Delete ${f.name}?`)) return
+    if (!(await dialog.confirm({ title: 'Delete file?', message: `Delete ${f.name}?`, danger: true, confirmText: 'Delete' }))) return
     try {
       await workspaceApi.deleteFile(id, f.id)
       setWs((w) => ({ ...w, files: w.files.filter((x) => x.id !== f.id) }))
@@ -184,11 +186,11 @@ export default function WorkspaceDetail() {
         </div>
       </div>
 
-      <div className="grid grid-cols-[200px_1fr] gap-4">
-        {/* Sidebar */}
-        <div className="flex flex-col gap-4">
-          <div className="card p-3">
-            <div className="flex items-center justify-between mb-2">
+      <div className="grid grid-cols-[200px_1fr] gap-4 h-[72vh]">
+        {/* Sidebar — each card scrolls on its own, never the whole page */}
+        <div className="flex flex-col gap-4 min-h-0">
+          <div className="card p-3 flex flex-col min-h-0 flex-1">
+            <div className="flex items-center justify-between mb-2 shrink-0">
               <span className="text-xs font-semibold uppercase tracking-wide text-ink-400">Files</span>
               {!isViewer && (
                 <div className="flex items-center gap-1.5">
@@ -197,19 +199,22 @@ export default function WorkspaceDetail() {
                 </div>
               )}
             </div>
-            {ws.files.length === 0 && <p className="text-xs text-ink-300">No files yet</p>}
-            {ws.files.map((f) => (
-              <div key={f.id} onClick={() => openFile(f)}
-                className={`group flex items-center justify-between px-2 py-1.5 rounded cursor-pointer text-sm ${activeFile?.id === f.id ? 'bg-ink-100 text-ink-900' : 'text-ink-500 hover:bg-ink-50'}`}>
-                <span className="flex items-center gap-1.5 truncate"><File size={13} /> {f.name}</span>
-                {!isViewer && <button onClick={(e) => removeFile(f, e)} className="opacity-0 group-hover:opacity-100 text-ink-300 hover:text-red-500"><Trash2 size={12} /></button>}
-              </div>
-            ))}
+            {/* Independent scroll region for the file list */}
+            <div className="flex-1 min-h-0 overflow-y-auto -mr-1 pr-1">
+              {ws.files.length === 0 && <p className="text-xs text-ink-300">No files yet</p>}
+              {ws.files.map((f) => (
+                <div key={f.id} onClick={() => openFile(f)}
+                  className={`group flex items-center justify-between px-2 py-1.5 rounded cursor-pointer text-sm ${activeFile?.id === f.id ? 'bg-ink-100 text-ink-900' : 'text-ink-500 hover:bg-ink-50'}`}>
+                  <span className="flex items-center gap-1.5 truncate"><File size={13} /> {f.name}</span>
+                  {!isViewer && <button onClick={(e) => removeFile(f, e)} className="opacity-0 group-hover:opacity-100 text-ink-300 hover:text-red-500"><Trash2 size={12} /></button>}
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Members */}
-          <div className="card p-3">
-            <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-2 flex items-center gap-1"><Users size={13} /> Members</div>
+          {/* Members — own scroll box, capped so Files keeps its space */}
+          <div className="card p-3 shrink-0 max-h-[38%] overflow-y-auto">
+            <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-2 flex items-center gap-1 sticky top-0 bg-white dark:bg-gray-900"><Users size={13} /> Members</div>
             {ws.members?.map((m) => (
               <div key={m.id} className="flex items-center gap-2 py-1 text-sm text-ink-600">
                 <div className="w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center" style={{ background: m.id === user.id ? '#9ca3af' : colorFor(m.id) }}>{m.name?.[0]?.toUpperCase()}</div>

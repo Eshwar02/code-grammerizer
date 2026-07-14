@@ -2,14 +2,16 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { reviewsApi } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
+import { useDialog } from '../components/Dialog'
 import toast from 'react-hot-toast'
-import { Plus, Search, Trash2, ChevronRight, Calendar, Filter } from 'lucide-react'
+import { Plus, Search, Trash2, ChevronRight, Calendar, Filter, FolderGit2, FileCode } from 'lucide-react'
 
 const scoreColor = (s) => s >= 75 ? 'text-lime-500' : s >= 50 ? 'text-yellow-500' : 'text-red-500'
 const scoreBg   = (s) => s >= 75 ? 'bg-lime-400'  : s >= 50 ? 'bg-yellow-400'   : 'bg-red-400'
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const dialog = useDialog()
   const [reviews, setReviews] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
@@ -27,7 +29,7 @@ export default function Dashboard() {
 
   const handleDelete = async (id, e) => {
     e.preventDefault()
-    if (!confirm('Delete this review?')) return
+    if (!(await dialog.confirm({ title: 'Delete review?', message: 'This permanently removes the review.', danger: true, confirmText: 'Delete' }))) return
     try {
       await reviewsApi.delete(id)
       setReviews((p) => p.filter((r) => r.id !== id))
@@ -128,7 +130,14 @@ export default function Dashboard() {
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-ink-900 text-sm truncate">{r.project_name}</div>
+                <div className="font-semibold text-ink-900 text-sm truncate flex items-center gap-2">
+                  {r.project_name}
+                  {r.upload_type === 'repo' && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-blue-500 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-sm">
+                      <FolderGit2 size={9} /> repo · <FileCode size={9} /> {r.file_count} files
+                    </span>
+                  )}
+                </div>
                 <div className="text-xs text-ink-400 truncate mt-0.5">{r.summary}</div>
               </div>
 

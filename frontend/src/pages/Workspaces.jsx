@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { workspaceApi } from '../services/api'
+import { useDialog } from '../components/Dialog'
 import toast from 'react-hot-toast'
 import { Plus, Users, ChevronRight, Trash2, LogIn } from 'lucide-react'
 
 export default function Workspaces() {
+  const dialog = useDialog()
   const [workspaces, setWorkspaces] = useState([])
   const [loading, setLoading] = useState(true)
   const [name, setName] = useState('')
@@ -40,7 +42,7 @@ export default function Workspaces() {
 
   const remove = async (id, e) => {
     e.preventDefault(); e.stopPropagation()
-    if (!confirm('Delete this workspace for everyone?')) return
+    if (!(await dialog.confirm({ title: 'Delete workspace?', message: 'This deletes the workspace for everyone.', danger: true, confirmText: 'Delete' }))) return
     try {
       await workspaceApi.remove(id)
       setWorkspaces((p) => p.filter((w) => w.id !== id))

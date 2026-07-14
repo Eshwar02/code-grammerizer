@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
-import { LayoutDashboard, Upload, LogOut, Code2, User, ChevronDown, Moon, Sun, Users } from 'lucide-react'
+import { LayoutDashboard, Upload, LogOut, Code2, User, ChevronDown, Moon, Sun, Users, FolderGit2 } from 'lucide-react'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
@@ -47,6 +47,15 @@ export default function Navbar() {
                   : 'text-ink-600 dark:text-gray-400 hover:text-ink-900 dark:hover:text-white hover:bg-ink-50 dark:hover:bg-gray-800'
               }`}>
               <Upload size={14} /> New Review
+            </Link>
+
+            <Link to="/projects"
+              className={`flex items-center gap-1.5 text-sm px-3 py-2 transition-colors ${
+                location.pathname === '/projects'
+                  ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/30 font-medium'
+                  : 'text-ink-600 dark:text-gray-400 hover:text-ink-900 dark:hover:text-white hover:bg-ink-50 dark:hover:bg-gray-800'
+              }`}>
+              <FolderGit2 size={14} /> Projects
             </Link>
 
             <Link to="/workspaces"
