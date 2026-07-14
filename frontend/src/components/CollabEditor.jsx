@@ -16,16 +16,11 @@ function syncCursorStyles(awareness) {
   let css = ''
   awareness.getStates().forEach((state, clientId) => {
     const color = state?.user?.color
-    const name = (state?.user?.name || 'anon').replace(/'/g, '')
     if (!color) return
+    // Colored selection + caret only — no name label.
     css += `
       .yRemoteSelection-${clientId} { background-color: ${color}44; }
-      .yRemoteSelectionHead-${clientId} { position: relative; border-left: ${color} 2px solid; }
-      .yRemoteSelectionHead-${clientId}::after {
-        content: '${name}';
-        position: absolute; top: -1.4em; left: -2px; white-space: nowrap;
-        background: ${color}; color: #fff; font-size: 10px; padding: 0 4px; border-radius: 2px;
-      }`
+      .yRemoteSelectionHead-${clientId} { border-left: ${color} 2px solid; box-sizing: border-box; }`
   })
   el.textContent = css
 }

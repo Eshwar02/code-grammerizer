@@ -150,15 +150,18 @@ export default function WorkspaceDetail() {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          {/* Presence avatars */}
+          {/* Presence avatars — other members use their cursor color; current user is neutral */}
           <div className="flex -space-x-2">
-            {peers.map((p, i) => (
-              <div key={i} title={p.name}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-white border-2 border-white"
-                style={{ background: p.color || colorFor(p.id) }}>
-                {p.name?.[0]?.toUpperCase()}
-              </div>
-            ))}
+            {peers.map((p, i) => {
+              const isSelf = p.id === user.id
+              return (
+                <div key={i} title={isSelf ? `${p.name} (you)` : p.name}
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-white border-2 border-white"
+                  style={{ background: isSelf ? '#9ca3af' : (p.color || colorFor(p.id)) }}>
+                  {p.name?.[0]?.toUpperCase()}
+                </div>
+              )
+            })}
           </div>
           <button onClick={toggleHistory}
             className={`flex items-center gap-1.5 text-sm px-2.5 py-1.5 rounded border ${showHistory ? 'border-blue-400 text-blue-500' : 'border-ink-200 text-ink-500 hover:text-ink-900'}`}>
@@ -190,8 +193,8 @@ export default function WorkspaceDetail() {
             <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-2 flex items-center gap-1"><Users size={13} /> Members</div>
             {ws.members?.map((m) => (
               <div key={m.id} className="flex items-center gap-2 py-1 text-sm text-ink-600">
-                <div className="w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center" style={{ background: colorFor(m.id) }}>{m.name?.[0]?.toUpperCase()}</div>
-                <span className="truncate">{m.name}</span>
+                <div className="w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center" style={{ background: m.id === user.id ? '#9ca3af' : colorFor(m.id) }}>{m.name?.[0]?.toUpperCase()}</div>
+                <span className="truncate">{m.name}{m.id === user.id ? ' (you)' : ''}</span>
                 <span className="text-[10px] text-ink-300 ml-auto">{m.role}</span>
               </div>
             ))}
