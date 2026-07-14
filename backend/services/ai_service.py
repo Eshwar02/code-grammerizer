@@ -130,6 +130,25 @@ If the input contains multiple files (marked by "# ===== FILE: path ====="),
 review the project as a whole and mention the file path inside each issue's text.
 Return only valid JSON. No markdown fences, no extra text."""
 
+FIX_PROMPT = """You are an expert software engineer. You are given source code and a list of
+issues found during code review. Analyze the code's structure, then rewrite it to FIX the
+reported bugs and issues while preserving behavior and public interfaces.
+
+Rules:
+- Fix real bugs, security issues, and correctness problems first.
+- Keep the code runnable and self-consistent; do not leave TODOs or placeholders.
+- Preserve the original language, style, and formatting conventions.
+- If the input contains multiple files (marked "# ===== FILE: path ====="), keep that same
+  file-marker layout in the fixed output so each file stays identifiable.
+
+Return only valid JSON, no markdown fences:
+{
+  "fixed_code": "<the full corrected code as a string>",
+  "changes": [{"issue": "<what was wrong>", "fix": "<what you changed>", "line": <int or null>}],
+  "summary": "<2-3 sentence summary of the fixes>",
+  "unresolved": ["<any issue you could not safely fix, or empty>"]
+}"""
+
 SUGGEST_PROMPT = """You are an expert code optimizer. Given source code, return an improved version with a JSON response:
 {
   "improved_code": "<the full improved code as a string>",
@@ -193,6 +212,12 @@ def suggest_code(code: str, language: str = "python", focus: str = "") -> dict:
     focus_text = f"\nFocus on: {focus}" if focus else ""
     user = f"Language: {language}{focus_text}\n\nCode:\n```{language}\n{_clip(code)}\n```"
     return _chat("codestral", SUGGEST_PROMPT, user, 4096)
+
+
+def fix_code(code: str, language: str = "python", issues: str = "") -> dict:
+    issues_text = f"\n\nReported issues to fix:\n{issues}" if issues.strip() else ""
+    user = f"Language: {language}{issues_text}\n\nCode:\n```{language}\n{_clip(code)}\n```"
+    return _chat("codestral", FIX_PROMPT, user, 4096)
 
 
 def generate_documentation(code: str, language: str = "python") -> dict:

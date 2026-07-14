@@ -63,6 +63,7 @@ export const lintApi = {
 
 export const suggestApi = {
   code: (code, language, focus = '') => api.post('/suggest/code', { code, language, focus }),
+  fix: (code, language, issues = '') => api.post('/suggest/fix', { code, language, issues }),
 }
 
 export const workspaceApi = {

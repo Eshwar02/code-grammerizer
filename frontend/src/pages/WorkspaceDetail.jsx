@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { workspaceApi } from '../services/api'
+import { workspaceApi, suggestApi } from '../services/api'
 import { useAuth } from '../hooks/useAuth'
 import { createCollab, colorFor } from '../services/collab'
 import CollabEditor from '../components/CollabEditor'
 import { useDialog } from '../components/Dialog'
 import NeonLoader from '../components/NeonLoader'
 import toast from 'react-hot-toast'
-import { ArrowLeft, Plus, GitBranch, File, Trash2, Users, Link2, Wifi, WifiOff, Check, History, X } from 'lucide-react'
+import { ArrowLeft, Plus, GitBranch, File, Trash2, Users, Link2, Wifi, WifiOff, Check, History, X, Wand2 } from 'lucide-react'
 
 const LANGS = ['python', 'javascript', 'typescript', 'java', 'cpp', 'go']
 
@@ -25,6 +25,7 @@ export default function WorkspaceDetail() {
   const [copied, setCopied] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [changes, setChanges] = useState([])
+  const [fixLoading, setFixLoading] = useState(false)
 
   const collabRef = useRef(null)
   const saveTimer = useRef(null)
@@ -138,6 +139,29 @@ export default function WorkspaceDetail() {
     } catch { toast.error('Delete failed') }
   }
 
+  // Codestral fixes the active file, then writes the result into the shared doc
+  // so every collaborator sees the fix live.
+  const fixWithAI = async () => {
+    const c = collabRef.current
+    if (!c || !activeFile) { toast.error('Open a file first'); return }
+    const code = c.ytext.toString()
+    if (!code.trim()) { toast.error('File is empty'); return }
+    const ok = await dialog.confirm({
+      title: 'Fix with AI?', danger: true, confirmText: 'Fix & replace',
+      message: `Codestral will analyze ${activeFile.name} and overwrite it with a fixed version for everyone in this room.`,
+    })
+    if (!ok) return
+    setFixLoading(true)
+    const t = toast.loading('Codestral fixing…')
+    try {
+      const { data } = await suggestApi.fix(code, activeFile.language || 'python', '')
+      if (data.error || !data.fixed_code) { toast.error(data.error || 'AI fix unavailable', { id: t }); return }
+      c.doc.transact(() => { c.ytext.delete(0, c.ytext.length); c.ytext.insert(0, data.fixed_code) })
+      toast.success(data.summary || 'Fix applied to the document', { id: t })
+    } catch { toast.error('Fix failed', { id: t }) }
+    finally { setFixLoading(false) }
+  }
+
   const invite = async (e) => {
     e.preventDefault()
     if (!invEmail.trim()) return
@@ -245,7 +269,17 @@ export default function WorkspaceDetail() {
             <>
               <div className="flex items-center justify-between px-3 py-1.5 border-b border-ink-100 text-xs text-ink-400">
                 <span>{activeFile.name}</span>
-                <span>{isViewer ? 'read-only' : saved ? 'saved' : 'saving…'}</span>
+                <div className="flex items-center gap-3">
+                  {!isViewer && (
+                    <button onClick={fixWithAI} disabled={fixLoading}
+                      className="flex items-center gap-1 text-blue-500 hover:text-blue-600 font-medium"
+                      title="Codestral analyzes and fixes this file for the whole team">
+                      {fixLoading ? <NeonLoader inline width={30} label="" /> : <Wand2 size={12} />}
+                      {fixLoading ? 'Fixing…' : 'Fix with AI'}
+                    </button>
+                  )}
+                  <span>{isViewer ? 'read-only' : saved ? 'saved' : 'saving…'}</span>
+                </div>
               </div>
               <CollabEditor collab={collab} language={activeFile.language} readOnly={isViewer} height="72vh" />
             </>

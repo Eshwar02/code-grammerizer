@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { reviewsApi, reportsApi, suggestApi, lintApi, workspaceApi } from '../services/api'
 import toast from 'react-hot-toast'
-import { ArrowLeft, Download, FileText, AlertTriangle, ShieldAlert, Zap, Code2, BookOpen, BarChart3, Wand2, Copy, ChevronDown, ChevronUp, Loader2, Users } from 'lucide-react'
+import { ArrowLeft, Download, FileText, AlertTriangle, ShieldAlert, Zap, Code2, BookOpen, BarChart3, Wand2, Copy, ChevronDown, ChevronUp, Loader2, Users, Check } from 'lucide-react'
 import ScoreRing from '../components/ScoreRing'
 import CodeEditor from '../components/CodeEditor'
 import NeonLoader from '../components/NeonLoader'
@@ -168,6 +168,8 @@ export default function ReviewDetail() {
   const [editableCode, setEditableCode] = useState('')
   const [rerunLoading, setRerunLoading] = useState(false)
   const [collabLoading, setCollabLoading] = useState(false)
+  const [fixLoading, setFixLoading] = useState(false)
+  const [fixResult, setFixResult] = useState(null)
   const [liveLintFindings, setLiveLintFindings] = useState([])
   const [pdfMenuOpen, setPdfMenuOpen] = useState(false)
   const debounceRef = useRef(null)
@@ -265,6 +267,33 @@ export default function ReviewDetail() {
     } finally {
       setRerunLoading(false)
     }
+  }
+
+  // Compile review findings into a text list Codestral can act on.
+  const collectIssues = () => {
+    const fs = review.findings || []
+    const lines = fs.map((f) => `- [${f.severity}/${f.category}] ${f.issue}${f.line_number ? ` (line ${f.line_number})` : ''}`)
+    for (const b of (review.ai_review?.bugs || [])) lines.push(`- [bug] ${b.issue}${b.line ? ` (line ${b.line})` : ''}`)
+    return lines.join('\n')
+  }
+
+  const handleFix = async () => {
+    if (!editableCode?.trim()) { toast.error('No code to fix'); return }
+    setFixLoading(true); setFixResult(null)
+    try {
+      const { data } = await suggestApi.fix(editableCode, review.language || 'python', collectIssues())
+      if (data.error || !data.fixed_code) { toast.error(data.error || 'AI fix unavailable'); return }
+      setFixResult(data)
+      toast.success('Fix ready — review and apply')
+    } catch { toast.error('Fix failed') }
+    finally { setFixLoading(false) }
+  }
+
+  const applyFix = () => {
+    if (!fixResult?.fixed_code) return
+    setEditableCode(fixResult.fixed_code)
+    setFixResult(null)
+    toast.success('Applied — Re-Run Analysis to verify')
   }
 
   // Turn the current file into a live team workspace, seeded with the edited code.
@@ -598,6 +627,15 @@ export default function ReviewDetail() {
                 {collabLoading ? 'Starting…' : 'Collaborate'}
               </button>
               <button
+                onClick={handleFix}
+                disabled={fixLoading}
+                className="btn-primary flex items-center gap-1.5 text-sm"
+                title="Codestral analyzes the code and fixes the reported bugs"
+              >
+                {fixLoading ? <NeonLoader inline width={38} label="" /> : <Wand2 size={13} />}
+                {fixLoading ? 'Fixing…' : 'Fix with AI'}
+              </button>
+              <button
                 onClick={handleRerun}
                 disabled={rerunLoading}
                 className="btn-lime flex items-center gap-1.5 text-sm"
@@ -607,6 +645,37 @@ export default function ReviewDetail() {
               </button>
             </div>
           </div>
+
+          {fixResult && (
+            <div className="border border-blue-300 bg-blue-50/40">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-blue-200 bg-blue-50">
+                <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide flex items-center gap-1.5"><Wand2 size={12} /> AI Fix by Codestral</span>
+                <div className="flex gap-2">
+                  <button onClick={() => setFixResult(null)} className="btn-ghost text-xs py-1 px-2">Discard</button>
+                  <button onClick={applyFix} className="btn-primary text-xs py-1 px-3 flex items-center gap-1"><Check size={11} /> Apply to editor</button>
+                </div>
+              </div>
+              <div className="p-3 space-y-2">
+                {fixResult.summary && <p className="text-xs text-ink-600 italic">{fixResult.summary}</p>}
+                {fixResult.changes?.length > 0 && (
+                  <div className="space-y-1">
+                    {fixResult.changes.map((c, i) => (
+                      <div key={i} className="text-xs border-l-2 border-lime-400 pl-2">
+                        <span className="text-red-500">{c.issue}</span>
+                        {c.line ? <span className="text-ink-300 ml-1">L{c.line}</span> : null}
+                        <span className="text-lime-600"> → {c.fix}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {fixResult.unresolved?.length > 0 && (
+                  <p className="text-xs text-yellow-700">Could not auto-fix: {fixResult.unresolved.join('; ')}</p>
+                )}
+                <pre className="text-xs font-mono bg-white border border-ink-200 p-3 overflow-auto max-h-64 whitespace-pre-wrap leading-relaxed">{fixResult.fixed_code}</pre>
+              </div>
+            </div>
+          )}
+
           <div className="border border-ink-200">
             <CodeEditor
               value={editableCode}
