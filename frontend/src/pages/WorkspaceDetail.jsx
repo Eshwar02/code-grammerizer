@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { createCollab, colorFor } from '../services/collab'
 import CollabEditor from '../components/CollabEditor'
 import toast from 'react-hot-toast'
-import { ArrowLeft, Plus, File, Trash2, Users, Link2, Wifi, WifiOff, Check, History, X } from 'lucide-react'
+import { ArrowLeft, Plus, GitBranch, File, Trash2, Users, Link2, Wifi, WifiOff, Check, History, X } from 'lucide-react'
 
 const LANGS = ['python', 'javascript', 'typescript', 'java', 'cpp', 'go']
 
@@ -111,6 +111,20 @@ export default function WorkspaceDetail() {
     } catch { toast.error('Create failed') }
   }
 
+  const importRepo = async () => {
+    const repo_url = prompt('Git repo URL (https://github.com/user/repo)')
+    if (!repo_url) return
+    const branch = prompt('Branch (blank = default)') || ''
+    const t = toast.loading('Pulling repo…')
+    try {
+      const { data } = await workspaceApi.importRepo(id, repo_url.trim(), branch.trim())
+      setWs((w) => ({ ...w, files: [...w.files, ...data.files] }))
+      toast.success(`Imported ${data.imported} files${data.truncated ? ' (truncated)' : ''}`, { id: t })
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Import failed', { id: t })
+    }
+  }
+
   const removeFile = async (f, e) => {
     e.stopPropagation()
     if (!confirm(`Delete ${f.name}?`)) return
@@ -176,7 +190,12 @@ export default function WorkspaceDetail() {
           <div className="card p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-ink-400">Files</span>
-              {!isViewer && <button onClick={addFile} className="text-ink-400 hover:text-ink-900"><Plus size={15} /></button>}
+              {!isViewer && (
+                <div className="flex items-center gap-1.5">
+                  <button onClick={importRepo} title="Import git repo" className="text-ink-400 hover:text-ink-900"><GitBranch size={14} /></button>
+                  <button onClick={addFile} title="New file" className="text-ink-400 hover:text-ink-900"><Plus size={15} /></button>
+                </div>
+              )}
             </div>
             {ws.files.length === 0 && <p className="text-xs text-ink-300">No files yet</p>}
             {ws.files.map((f) => (

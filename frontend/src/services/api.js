@@ -34,6 +34,8 @@ export const projectsApi = {
   list: () => api.get('/projects/'),
   submitSnippet: (data) => api.post('/projects/snippet', data),
   submitFile: (formData) => api.post('/projects/file', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  submitRepo: (data) => api.post('/projects/repo', data),
+  files: (id) => api.get(`/projects/${id}/files`),
   delete: (id) => api.delete(`/projects/${id}`),
 }
 
@@ -72,6 +74,7 @@ export const workspaceApi = {
   removeMember: (id, userId) => api.delete(`/workspaces/${id}/members/${userId}`),
   toggleShare: (id) => api.post(`/workspaces/${id}/share`),
   join: (code) => api.post('/workspaces/join', { code }),
+  importRepo: (id, repo_url, branch = '', token = '') => api.post(`/workspaces/${id}/import-repo`, { repo_url, branch, token }),
   createFile: (id, name, language) => api.post(`/workspaces/${id}/files`, { name, language }),
   getFile: (id, fileId) => api.get(`/workspaces/${id}/files/${fileId}`),
   saveFile: (id, fileId, ydoc_snapshot, content) =>

@@ -20,9 +20,12 @@ def _run_full_review(project_id: int, user_id: int):
     if not code:
         return
 
+    # Single-file static tools (pylint/bandit/radon) give bogus line numbers on a
+    # concatenated multi-file repo blob, so skip them for repo projects.
+    is_repo = project.get("upload_type") == "repo"
     static = {}
     complexity = {}
-    if language == "python":
+    if language == "python" and not is_repo:
         try:
             static["pylint"] = run_pylint(code, project.get("file_name") or "code.py")
         except Exception as e:

@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from models.supabase_client import get_supabase
 from utils.auth import get_current_user
+from services.git_service import pull_repo, RepoError
 
 router = APIRouter(prefix="/workspaces", tags=["workspaces"])
 
@@ -25,6 +26,12 @@ class CreateFile(BaseModel):
     name: str
     language: str = "python"
     content: str = ""
+
+
+class ImportRepo(BaseModel):
+    repo_url: str
+    branch: str = ""
+    token: str = ""
 
 
 class SaveFile(BaseModel):
@@ -188,6 +195,31 @@ def create_file(workspace_id: int, body: CreateFile, user: dict = Depends(get_cu
         "language": body.language, "content": body.content,
     }).execute().data[0]
     return f
+
+
+@router.post("/{workspace_id}/import-repo", status_code=201)
+def import_repo(workspace_id: int, body: ImportRepo, user: dict = Depends(get_current_user)):
+    """Pull a small git repo into a workspace as collaborative files."""
+    sb = get_supabase()
+    m = _require_member(sb, workspace_id, user)
+    if m["role"] == "viewer":
+        raise HTTPException(status_code=403, detail="Viewers cannot import")
+    try:
+        result = pull_repo(body.repo_url, body.branch, body.token)
+    except RepoError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    rows = sb.table("workspace_files").insert([
+        {"workspace_id": workspace_id, "name": f["path"],
+         "language": f["language"], "content": f["content"]}
+        for f in result["files"]
+    ]).execute()
+    return {
+        "imported": len(rows.data or []),
+        "truncated": result["truncated"],
+        "skipped": result["skipped"],
+        "files": rows.data or [],
+    }
 
 
 @router.get("/{workspace_id}/files/{file_id}")

@@ -12,6 +12,7 @@ backend/__pycache__/
 backend/**/__pycache__/
 backend/*.pyc
 backend/venv/
+backend/.venv312/
 backend/uploads/
 backend/*.db
 

@@ -12,7 +12,7 @@ Catch bugs, security holes, and complexity in seconds — then fix them *togethe
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://code-grammerizer.vercel.app)
 [![Backend](https://img.shields.io/badge/API-Render-46E3B7?style=for-the-badge&logo=render)](https://code-grammerizer-api.onrender.com/health)
 [![Database](https://img.shields.io/badge/Database-Supabase-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
-[![AI](https://img.shields.io/badge/AI-Cerebras-FF6B6B?style=for-the-badge&logo=lightning)](https://cerebras.ai)
+[![AI](https://img.shields.io/badge/AI-Multi--Provider-FF6B6B?style=for-the-badge&logo=lightning)](#-multi-provider-ai--model-routing)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#-license)
 
 </div>
@@ -51,6 +51,7 @@ Code review is slow, solo, and disconnected from where code actually gets writte
 - Code smell + naming/refactor advice
 - Auto-generated documentation
 - Inline AI code suggestions
+- **Multi-provider AI** with automatic fallback
 
 </td>
 </tr>
@@ -92,6 +93,20 @@ Code review is slow, solo, and disconnected from where code actually gets writte
 
 </td>
 </tr>
+<tr>
+<td>
+
+### 📦 Pull a Git Repo `NEW`
+- Review a **small project straight from its Git URL** — no zip, no copy-paste
+- Shallow clone, source-file filtering, whole-project AI review
+- Works **solo** (personal projects) **or team** (import into a collaborative workspace)
+- **Public repos need no auth** — paste any URL; optional token for private repos
+
+</td>
+<td>
+
+</td>
+</tr>
 </table>
 
 ---
@@ -130,6 +145,45 @@ Relay benchmarked with a concurrent WebSocket harness (`backend/tests/load_test_
 
 > Zero dropped frames, sub-6 ms under real typing load.
 
+**REST API** benchmarked with an async `httpx` harness against the FastAPI backend:
+
+| Scenario | Requests | Concurrency | Errors | p50 | p95 | Throughput |
+|---|---|---|---|---|---|---|
+| Authenticated read (`GET /projects/`) | 500 | 50 | **0** | 427 ms | 672 ms | **108 req/s** |
+| Repo pull (`POST /projects/repo`, shallow clone) | 12 | 6 | **0** | 1.5 s | 1.55 s | 4.2 pulls/s |
+
+> Load testing surfaced (and fixed) a real concurrency bug: the shared Supabase client reused one HTTP/2 connection pool across FastAPI's worker threads, corrupting concurrent writes. The client is now **thread-local**, taking concurrent repo pulls from ~50% failures to **0 errors**.
+
+---
+
+## 📦 Review a Git Repo
+
+Point Code-Grammerizer at a **small project's Git URL** and it pulls the code for you — no zip upload, no copy-paste.
+
+- **Solo** — `POST /projects/repo` with `{ repo_url, project_name?, branch?, token? }`. Runs a shallow `git clone --depth 1`, keeps source files (`.py .js .ts .jsx .tsx .java .cpp .c .go`), and skips `node_modules`, `.git`, `venv`, `dist`, `build`, etc. Guardrails: **40 files max**, **100 KB per file**, **500 KB total**. The result is stored as a multi-file project (new `project_files` table) plus a concatenated blob used for a **whole-project AI review**. `GET /projects/{id}/files` lists the imported files.
+- **Team** — `POST /workspaces/{id}/import-repo` pulls the same way directly into collaborative workspace files.
+- **Public repos need no auth** — paste any user's public repo URL and it works. The optional `token` is only for private repos.
+
+> On repo projects, single-file static tools (Pylint / Bandit / Radon) are skipped — line numbers are meaningless on a concatenated blob, so review is AI-only.
+
+**In the UI**
+- **Upload page** — a new **"Pull Repo"** tab (repo URL + optional branch / token).
+- **Workspace detail** — a Git-import button next to the Files **`+`**.
+
+---
+
+## 🧠 Multi-Provider AI & Model Routing
+
+The AI layer is **multi-provider with automatic fallback** — the right model for each job, and a safety net if a provider errors. No OpenAI is used anywhere.
+
+| Task | Provider | Model |
+|---|---|---|
+| **Code writing** — `/suggest`, documentation generation | Codestral (Mistral) | `codestral-latest` |
+| **Analysis** — code review, profile insights | gpt-oss (Cerebras) | `gpt-oss-120b` |
+| **Fallback** — used automatically if the primary provider errors | Groq | `llama-3.3-70b-versatile` |
+
+> AI input is clipped to a **~40k-character budget** per call to stay under provider payload limits.
+
 ---
 
 ## 🚀 Tech Stack
@@ -140,7 +194,7 @@ Relay benchmarked with a concurrent WebSocket harness (`backend/tests/load_test_
 | **Editor** | Monaco (VSCode engine) |
 | **Realtime** | Yjs (CRDT) · `y-websocket` · `y-monaco` · `y-indexeddb` |
 | **Backend** | FastAPI (Python 3.11) · WebSockets |
-| **AI** | Cerebras (`gpt-oss-120b`) |
+| **AI** | Codestral (Mistral) · Cerebras (`gpt-oss-120b`) · Groq (fallback) |
 | **Database** | Supabase (PostgreSQL + RLS) |
 | **Static Analysis** | Pylint · Bandit · Radon |
 | **Reports** | ReportLab (PDF) |
@@ -158,13 +212,15 @@ code-grammerizer/
 │   ├── config.py                  # Settings (pydantic-settings)
 │   ├── migrations/
 │   │   ├── 001_initial.sql        # Core tables
-│   │   └── 002_collab.sql         # Workspaces, members, invites, files, change log
+│   │   ├── 002_collab.sql         # Workspaces, members, invites, files, change log
+│   │   └── 003_project_files.sql  # Multi-file projects (Git repo pull)
 │   ├── routes/
 │   │   ├── auth.py                # Register, login, profile, stats
-│   │   ├── review.py · report.py · lint.py · suggest.py · upload.py
-│   │   ├── workspace.py           # Workspaces, membership, invites, files, change log
+│   │   ├── review.py · report.py · lint.py · suggest.py
+│   │   ├── upload.py              # Uploads + Git repo pull → multi-file project + files list
+│   │   ├── workspace.py           # Workspaces, membership, invites, files, repo import, change log
 │   │   └── collab.py              # WebSocket CRDT relay  ← real-time sync
-│   ├── services/                  # Cerebras AI + Pylint/Bandit/Radon/live-lint
+│   ├── services/                  # Multi-provider AI (Codestral/Cerebras/Groq) + Pylint/Bandit/Radon/live-lint
 │   ├── models/supabase_client.py  # Supabase client (service_role, RLS-safe)
 │   └── tests/load_test_collab.py  # Collaboration load/stress harness
 └── frontend/
@@ -188,9 +244,10 @@ code-grammerizer/
 ## ⚙️ Local Development
 
 ### Prerequisites
-- Python 3.11+ · Node.js 18+
+- Python 3.11+ · Node.js 18+ · Git (for repo pull)
 - A [Supabase](https://supabase.com) project
 - A [Cerebras](https://cerebras.ai) API key
+- A [Mistral](https://mistral.ai) and a [Groq](https://groq.com) API key
 
 ### 1. Backend
 
@@ -207,11 +264,12 @@ cp .env.example .env              # then fill in your keys
 
 ### 2. Database
 
-Run both migrations in your Supabase SQL editor, in order:
+Run all migrations in your Supabase SQL editor, in order:
 
 ```
-backend/migrations/001_initial.sql     # users, projects, reviews, findings
-backend/migrations/002_collab.sql       # workspaces, members, invites, files, change log
+backend/migrations/001_initial.sql        # users, projects, reviews, findings
+backend/migrations/002_collab.sql         # workspaces, members, invites, files, change log
+backend/migrations/003_project_files.sql  # multi-file projects (Git repo pull)
 ```
 
 > RLS is enabled on all tables; the backend connects with the `service_role` key and gates access in code. Never expose the service key to the frontend.
@@ -244,13 +302,18 @@ Open **[http://localhost:5173](http://localhost:5173)** 🎉 — the Vite dev pr
 
 **Render (backend)**
 ```
-CEREBRAS_API_KEY=
+CEREBRAS_API_KEY=            # gpt-oss-120b — analysis (review, profile insights)
+MISTRAL_API_KEY=            # codestral-latest — code writing (suggest, docs)
+GROQ_API_KEY=               # llama-3.3-70b-versatile — automatic fallback
+GITHUB_TOKEN=               # optional — default token for private repo pulls
 SECRET_KEY=
 SUPABASE_URL=
 SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_KEY=        # service_role — bypasses RLS, backend only
 FRONTEND_URL=https://your-app.vercel.app
 ```
+
+> **Model routing:** Codestral (Mistral) writes code, gpt-oss (Cerebras) analyzes it, and Groq is the automatic fallback if the primary provider errors. See [Multi-Provider AI & Model Routing](#-multi-provider-ai--model-routing).
 
 **Vercel (frontend)** — optional; `vercel.json` already proxies REST to Render.
 ```
@@ -279,7 +342,7 @@ MIT © [Eshwar](https://github.com/Eshwar02)
 
 <div align="center">
 
-Built with **Yjs** · **Cerebras AI** · **FastAPI** · **React** · **Supabase**
+Built with **Yjs** · **Codestral / Cerebras / Groq AI** · **FastAPI** · **React** · **Supabase**
 
 <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=14&pause=1000&color=4361EE&center=true&vCenter=true&width=520&lines=Review+together.+Ship+faster.+%F0%9F%9A%80" alt="footer" />
 

@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import { projectsApi, reviewsApi, lintApi, suggestApi } from '../services/api'
 import toast from 'react-hot-toast'
-import { Upload as UploadIcon, FileCode, Code, ArrowLeft, AlertCircle, AlertTriangle, Info, CheckCircle, Loader2, Wand2, Copy, ChevronDown, ChevronUp } from 'lucide-react'
+import { Upload as UploadIcon, FileCode, Code, GitBranch, ArrowLeft, AlertCircle, AlertTriangle, Info, CheckCircle, Loader2, Wand2, Copy, ChevronDown, ChevronUp } from 'lucide-react'
 import CodeEditor from '../components/CodeEditor'
 
 const LANGUAGES = ['python', 'javascript', 'typescript', 'java', 'cpp', 'c', 'go']
@@ -167,6 +167,7 @@ export default function Upload() {
   const [mode, setMode] = useState('snippet')
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ project_name: '', code: '', language: 'python' })
+  const [repo, setRepo] = useState({ repo_url: '', branch: '', token: '' })
   const [file, setFile] = useState(null)
   const [lintFindings, setLintFindings] = useState([])
   const [lintLoading, setLintLoading] = useState(false)
@@ -197,13 +198,23 @@ export default function Upload() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.project_name.trim()) { toast.error('Project name required'); return }
+    if (mode !== 'repo' && !form.project_name.trim()) { toast.error('Project name required'); return }
     setLoading(true)
     try {
       let res
       if (mode === 'snippet') {
         if (!form.code.trim()) { toast.error('Paste some code'); setLoading(false); return }
         res = await projectsApi.submitSnippet({ project_name: form.project_name, code: form.code, language: form.language })
+      } else if (mode === 'repo') {
+        if (!repo.repo_url.trim()) { toast.error('Repo URL required'); setLoading(false); return }
+        res = await projectsApi.submitRepo({
+          repo_url: repo.repo_url.trim(),
+          project_name: form.project_name,
+          branch: repo.branch.trim(),
+          token: repo.token.trim(),
+        })
+        if (res.data.truncated) toast('Large repo — only the first files were pulled', { icon: '✂️' })
+        toast.success(`Pulled ${res.data.file_count} files`)
       } else {
         if (!file) { toast.error('Select a file'); setLoading(false); return }
         const fd = new FormData()
@@ -234,7 +245,7 @@ export default function Upload() {
       </div>
 
       <div className="flex border border-ink-200 mb-6 w-fit">
-        {[['snippet', Code, 'Paste Snippet'], ['file', FileCode, 'Upload File']].map(([m, Icon, label]) => (
+        {[['snippet', Code, 'Paste Snippet'], ['file', FileCode, 'Upload File'], ['repo', GitBranch, 'Pull Repo']].map(([m, Icon, label]) => (
           <button key={m} onClick={() => setMode(m)}
             className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-colors ${
               mode === m ? 'bg-blue-400 text-white' : 'bg-white text-ink-600 hover:bg-ink-50'
@@ -246,13 +257,39 @@ export default function Upload() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="card">
-          <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 block">Project Name</label>
-          <input className="input" value={form.project_name} required
+          <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 block">
+            Project Name {mode === 'repo' && <span className="text-ink-300 normal-case">(optional — defaults to repo name)</span>}
+          </label>
+          <input className="input" value={form.project_name} required={mode !== 'repo'}
             onChange={(e) => setForm({ ...form, project_name: e.target.value })}
             placeholder="e.g. Auth Service v2" />
         </div>
 
-        {mode === 'snippet' ? (
+        {mode === 'repo' ? (
+          <div className="card space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 block">Git Repo URL</label>
+              <input className="input font-mono text-sm" value={repo.repo_url}
+                onChange={(e) => setRepo({ ...repo, repo_url: e.target.value })}
+                placeholder="https://github.com/user/repo" />
+              <p className="text-ink-300 text-xs mt-1">Small projects only — up to 40 source files pulled via a shallow clone.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 block">Branch <span className="text-ink-300 normal-case">(optional)</span></label>
+                <input className="input" value={repo.branch}
+                  onChange={(e) => setRepo({ ...repo, branch: e.target.value })}
+                  placeholder="main" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 block">Token <span className="text-ink-300 normal-case">(private repos)</span></label>
+                <input className="input" type="password" value={repo.token}
+                  onChange={(e) => setRepo({ ...repo, token: e.target.value })}
+                  placeholder="ghp_…" />
+              </div>
+            </div>
+          </div>
+        ) : mode === 'snippet' ? (
           <div className="card space-y-4">
             <div>
               <label className="text-xs font-semibold text-ink-600 uppercase tracking-wide mb-1.5 block">Language</label>
