@@ -2,12 +2,20 @@ import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { IndexeddbPersistence } from 'y-indexeddb'
 
-// Backend WS host. Falls back to deriving ws:// from the REST API URL, then origin.
+// Backend WS host. WebSockets can't be proxied through Vercel rewrites, so they
+// must point straight at the backend.
+//   1. VITE_WS_URL if set
+//   2. derived from VITE_API_URL if set
+//   3. localhost dev -> same origin (Vite proxy forwards /ws)
+//   4. otherwise (prod) -> the Render backend directly
+const PROD_WS = 'wss://code-grammerizer-api.onrender.com'
 function wsBase() {
   if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL.replace(/\/$/, '')
   const api = import.meta.env.VITE_API_URL
   if (api) return api.replace(/^http/, 'ws').replace(/\/$/, '')
-  return window.location.origin.replace(/^http/, 'ws')
+  const { hostname, origin } = window.location
+  if (hostname === 'localhost' || hostname === '127.0.0.1') return origin.replace(/^http/, 'ws')
+  return PROD_WS
 }
 
 const PALETTE = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']

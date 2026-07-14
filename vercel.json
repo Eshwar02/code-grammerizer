@@ -4,6 +4,13 @@
   "outputDirectory": "frontend/dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/auth/:path*",       "destination": "https://code-grammerizer-api.onrender.com/auth/:path*" },
+    { "source": "/projects/:path*",   "destination": "https://code-grammerizer-api.onrender.com/projects/:path*" },
+    { "source": "/reviews/:path*",    "destination": "https://code-grammerizer-api.onrender.com/reviews/:path*" },
+    { "source": "/reports/:path*",    "destination": "https://code-grammerizer-api.onrender.com/reports/:path*" },
+    { "source": "/lint/:path*",       "destination": "https://code-grammerizer-api.onrender.com/lint/:path*" },
+    { "source": "/suggest/:path*",    "destination": "https://code-grammerizer-api.onrender.com/suggest/:path*" },
+    { "source": "/workspaces/:path*", "destination": "https://code-grammerizer-api.onrender.com/workspaces/:path*" },
+    { "source": "/(.*)",              "destination": "/index.html" }
   ]
 }
