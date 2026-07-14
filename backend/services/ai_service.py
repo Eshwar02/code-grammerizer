@@ -88,10 +88,15 @@ _PROVIDERS = {
 
 
 def _chat(primary: str, system: str, user: str, max_tokens: int) -> dict:
-    """Try `primary` provider, fall back to Groq on any error, then parse JSON."""
-    chain = [primary] + (["groq"] if primary != "groq" else [])
+    """Try `primary`, then Groq, then any other configured provider.
+
+    Falling through *every* provider (not just Groq) means a single missing key
+    never breaks a feature as long as one provider is configured — e.g. if
+    Mistral + Groq keys are absent, code-writing calls still fall back to gpt-oss.
+    """
+    chain = [primary, "groq"] + [p for p in _PROVIDERS if p not in (primary, "groq")]
     last_err = None
-    for name in chain:
+    for name in dict.fromkeys(chain):  # preserve order, drop dups
         try:
             raw = _PROVIDERS[name](system, user, max_tokens)
             return _parse_json(raw)

@@ -10,13 +10,21 @@ services:
     healthCheckPath: /health
     autoDeploy: true
     envVars:
-      - key: CEREBRAS_API_KEY
+      - key: CEREBRAS_API_KEY      # gpt-oss -> review + insights
+        sync: false
+      - key: MISTRAL_API_KEY       # codestral -> code writing + docs
+        sync: false
+      - key: GROQ_API_KEY          # fallback provider
+        sync: false
+      - key: GITHUB_TOKEN          # optional, private repo pulls only
         sync: false
       - key: SECRET_KEY
         sync: false
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
         sync: false
       - key: FRONTEND_URL
         sync: false
