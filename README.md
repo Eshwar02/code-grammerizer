@@ -1,3 +1,7 @@
+<p align="center"><img src="assets/cg-logo.svg" alt="code-grammerizer" width="360"></p>
+
+<p align="center"><sub>The wordmark rests collapsed as <code>&lt;c-g/&gt;</code> and expands to <code>&lt;code-grammerizer/&gt;</code> on hover in the app. GitHub Markdown strips CSS <code>:hover</code>, so the SVG above auto-plays the same collapse/expand as a loop. The live, interactive version lives in the app navbar (and standalone in <a href="cg-logo.html"><code>cg-logo.html</code></a>). Logo typeface: <b>Nunito</b> — scoped to the logo only, used nowhere else in the UI.</sub></p>
+
 <div align="center">
 
 <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=32&pause=1000&color=4361EE&center=true&vCenter=true&width=650&lines=Code-Grammerizer+%F0%9F%A7%A0;AI+Code+Review+%2B+Live+Collaboration;Analyze.+Collaborate.+Ship." alt="Typing SVG" />
@@ -16,6 +20,10 @@ Catch bugs, security holes, and complexity in seconds — then fix them *togethe
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#-license)
 
 </div>
+
+## 👋 What is Code-Grammerizer?
+
+**Code-Grammerizer** is an AI-powered code review assistant. Drop in a snippet, upload a file, or pull a Git repo, and it runs a multi-provider AI review (Codestral, gpt-oss/Cerebras, Groq fallback) alongside static analysis (Pylint, Bandit security, Radon complexity) to produce a scored, actionable review with one-click **"Fix with AI."** It also includes a real-time collaborative editor for team reviews.
 
 ---
 
@@ -153,6 +161,54 @@ Relay benchmarked with a concurrent WebSocket harness (`backend/tests/load_test_
 | Repo pull (`POST /projects/repo`, shallow clone) | 12 | 6 | **0** | 1.5 s | 1.55 s | 4.2 pulls/s |
 
 > Load testing surfaced (and fixed) a real concurrency bug: the shared Supabase client reused one HTTP/2 connection pool across FastAPI's worker threads, corrupting concurrent writes. The client is now **thread-local**, taking concurrent repo pulls from ~50% failures to **0 errors**.
+
+---
+
+## 📊 Performance & Load Testing
+
+Two self-contained harnesses live in `backend/tests/`. Both spin up the real server in-process and hammer it with concurrent workers, then report latency percentiles, throughput, and errors.
+
+```bash
+# HTTP API — routing / handler / serialization overhead
+cd backend && PYTHONPATH=. python tests/load_test_api.py [peak_concurrency]
+
+# Collab WebSocket relay — broadcast fan-out path
+cd backend && PYTHONPATH=. python tests/load_test_collab.py
+```
+
+The API test **stubs auth + Supabase** with an in-memory fake, so the numbers isolate the app's *own* routing/serialization overhead (handlers still run their full filtering/formatting/JSON logic over synthetic rows) rather than external-DB network time. `peak_concurrency` defaults to `200`.
+
+### Measured results
+
+Single-process `uvicorn` dev run. **Zero 5xx errors at every tier.**
+
+**Moderate load — 1000 requests @ concurrency 50**
+
+| Route | Throughput | p50 | p95 |
+|---|---|---|---|
+| `/health` (framework baseline) | 898 req/s | 37 ms | 146 ms |
+| `/reviews/all/me` (dashboard) | 324 req/s | 104 ms | 438 ms |
+| `/reviews/all/me` + filter | 391 req/s | 107 ms | 313 ms |
+| `/projects/` | 481 req/s | 77 ms | 264 ms |
+| `/workspaces/` | 635 req/s | 54 ms | 204 ms |
+
+**Peak / stress — 2000 requests @ concurrency 200** (p95, and factor vs the `/health` baseline)
+
+| Route | p95 | vs baseline |
+|---|---|---|
+| `/health` (baseline) | 814 ms | 1.0x |
+| `/reviews/all/me` (dashboard) | 1903 ms | **2.3x** — heaviest route |
+| `/reviews/all/me` + filter | 1504 ms | 1.8x |
+| `/projects/` | 1164 ms | 1.4x |
+| `/workspaces/` | 817 ms | 1.0x |
+
+### Findings
+
+- **No server errors under load** at any tier — the app stays correct while saturated.
+- The **dashboard endpoint (`/reviews/all/me`) is the hottest path**: it runs two queries plus Python-side filtering/formatting over ~200 reviews, so it sits ~2.3x above the framework baseline at peak.
+- **Mitigations already shipped:** client-side filtering (no request per keystroke), `localStorage` stale-while-revalidate caching, and Supabase connection warm-up on startup.
+- **Further scaling levers:** run multiple `uvicorn` workers in production, and add DB-side pagination + indexes on the review queries.
+- The absolute peak latencies reflect a **single dev process saturating**; production with multiple workers will deliver materially higher throughput.
 
 ---
 

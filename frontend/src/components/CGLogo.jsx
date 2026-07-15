@@ -1,31 +1,30 @@
 // Animated "code-grammerizer" wordmark. Collapsed to `<c-g/>` at rest; the
 // hidden segments expand on hover / keyboard focus. All styles are scoped to
-// `.cg-logo` — including the Bungee Inline font, which is used nowhere else.
+// `.cg-logo` — including the Nunito font, which is used nowhere else.
+//
+// The letters use one mono color. The design spec's cream (#F2F0EA) is for a
+// dark navbar; on our white light-mode navbar that would be invisible, so the
+// color is theme-aware: dark ink in light mode, cream under `.dark`.
 const css = `
 .cg-logo {
-  --c-red:#F94144; --c-pink:#FF5D8F; --c-blue:#2D5BFF; --c-peach:#FFB4A2;
-  --c-teal:#00A896; --c-yellow:#FFD60A; --c-purple:#7B5CFF;
-  font-family: 'Bungee Inline', system-ui, sans-serif;
+  font-family: 'Nunito', system-ui, sans-serif;
   display: inline-flex;
   align-items: baseline;
   cursor: pointer;
   text-decoration: none;
-  font-weight: 400;
-  font-size: 22px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: 0.2px;
+  text-transform: lowercase;
   line-height: 1;
   user-select: none;
 }
 .cg-logo .ch { display: inline-block; }
 .cg-logo .sym { color: #0F7B1F; }
-.cg-logo .k1 { color: var(--c-red); }
-.cg-logo .k2 { color: var(--c-pink); }
-.cg-logo .k3 { color: var(--c-blue); }
-.cg-logo .k4 { color: var(--c-peach); }
-.cg-logo .k5 { color: var(--c-teal); }
-.cg-logo .k6 { color: var(--c-yellow); }
-.cg-logo .k7 { color: var(--c-purple); }
+.cg-logo .k1, .cg-logo .k2, .cg-logo .k3, .cg-logo .k4,
+.cg-logo .k5, .cg-logo .k6, .cg-logo .k7 { color: #14110E; }
+.dark .cg-logo .k1, .dark .cg-logo .k2, .dark .cg-logo .k3, .dark .cg-logo .k4,
+.dark .cg-logo .k5, .dark .cg-logo .k6, .dark .cg-logo .k7 { color: #F2F0EA; }
 .cg-logo .word { display: inline-flex; align-items: baseline; }
 .cg-logo .expand {
   display: inline-flex;

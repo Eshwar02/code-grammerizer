@@ -6,7 +6,7 @@
 <title>code-grammerizer — logo demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bungee+Inline&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --c-red:    #F94144;
@@ -24,7 +24,7 @@
   body {
     background: #111;
     min-height: 100vh;
-    font-family: 'Bungee Inline', sans-serif;
+    font-family: 'Nunito', sans-serif;
   }
 
   /* ---- Navbar (demo context) ---- */
@@ -34,7 +34,7 @@
     justify-content: space-between;
     padding: 14px 28px;
     background: var(--ink);
-    border-bottom: 4px solid var(--c-yellow);
+    border-bottom: 1px solid #2a2a2a;
   }
 
   .nav-links {
@@ -47,7 +47,7 @@
     font-size: 13px;
     letter-spacing: 1px;
   }
-  .nav-links a:hover { color: var(--c-yellow); }
+  .nav-links a:hover { color: #0F7B1F; }
 
   /* ---- The logo ---- */
   .cg-logo {
@@ -55,10 +55,10 @@
     align-items: baseline;
     cursor: pointer;
     text-decoration: none;
-    font-weight: 400;
-    font-size: 26px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    font-weight: 800;
+    font-size: 24px;
+    letter-spacing: 0.2px;
+    text-transform: lowercase;
     line-height: 1;
     user-select: none;
   }
@@ -70,14 +70,9 @@
   /* bracket + slash characters */
   .cg-logo .sym { color: #0F7B1F; }
 
-  /* every visible letter gets its own funky color */
-  .cg-logo .k1 { color: var(--c-red); }
-  .cg-logo .k2 { color: var(--c-pink); }
-  .cg-logo .k3 { color: var(--c-blue); }
-  .cg-logo .k4 { color: var(--c-peach); }
-  .cg-logo .k5 { color: var(--c-teal); }
-  .cg-logo .k6 { color: var(--c-yellow); }
-  .cg-logo .k7 { color: var(--c-purple); }
+  /* all letters: single professional mono color */
+  .cg-logo .k1, .cg-logo .k2, .cg-logo .k3, .cg-logo .k4,
+  .cg-logo .k5, .cg-logo .k6, .cg-logo .k7 { color: #F2F0EA; }
 
   /* expandable segments: hidden by default, grow on hover */
   .cg-logo .expand {
