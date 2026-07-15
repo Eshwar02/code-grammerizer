@@ -23,7 +23,7 @@ Catch bugs, security holes, and complexity in seconds — then fix them *togethe
 
 ## 👋 What is Code-Grammerizer?
 
-**Code-Grammerizer** is an AI-powered code review assistant. Drop in a snippet, upload a file, or pull a Git repo, and it runs a multi-provider AI review (Codestral, gpt-oss/Cerebras, Groq fallback) alongside static analysis (Pylint, Bandit security, Radon complexity) to produce a scored, actionable review with one-click **"Fix with AI."** It also includes a real-time collaborative editor for team reviews.
+**Code-Grammerizer** — AI code review assistant. Snippet, file, or Git repo in → multi-provider AI review (Codestral, gpt-oss/Cerebras, Groq fallback) + static analysis (Pylint, Bandit security, Radon complexity) → scored, actionable review with one-click **"Fix with AI."** Plus a real-time collaborative editor for team reviews.
 
 ---
 
@@ -278,7 +278,9 @@ code-grammerizer/
 │   │   └── collab.py              # WebSocket CRDT relay  ← real-time sync
 │   ├── services/                  # Multi-provider AI (Codestral/Cerebras/Groq) + Pylint/Bandit/Radon/live-lint
 │   ├── models/supabase_client.py  # Supabase client (service_role, RLS-safe)
-│   └── tests/load_test_collab.py  # Collaboration load/stress harness
+│   └── tests/
+│       ├── load_test_api.py        # HTTP API load/stress harness (routing/serialization)
+│       └── load_test_collab.py     # Collaboration WS relay load/stress harness
 └── frontend/
     └── src/
         ├── pages/
