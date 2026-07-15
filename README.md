@@ -383,12 +383,26 @@ FRONTEND_URL=https://your-app.vercel.app
 
 > **Model routing:** Codestral (Mistral) writes code, gpt-oss (Cerebras) analyzes it, and Groq is the automatic fallback if the primary provider errors. See [Multi-Provider AI & Model Routing](#-multi-provider-ai--model-routing).
 
-**Vercel (frontend)** — optional; `vercel.json` already proxies REST to Render.
+**Vercel (frontend)**
 ```
+VITE_SUPABASE_URL=          # required for Google sign-in (baked at build → redeploy after change)
+VITE_SUPABASE_ANON_KEY=     # anon/publishable key — safe to expose, guarded by RLS
 VITE_WS_URL=wss://your-api.onrender.com   # only if your API host differs from the default
 ```
 
 > WebSocket traffic goes **directly** to the backend (Vercel can't proxy WS); the frontend defaults to the Render host in production.
+
+### Google Sign-In (Supabase OAuth)
+
+1. **Supabase → Authentication → Providers → Google** — enable, paste your Google **Client ID + Secret**.
+2. **Google Cloud Console → OAuth client** — authorized redirect URI: `https://<project>.supabase.co/auth/v1/callback`.
+3. **Supabase → Authentication → URL Configuration** — add redirect URLs:
+   ```
+   http://localhost:5173/oauth/callback
+   https://your-app.vercel.app/oauth/callback
+   ```
+
+> Frontend runs Supabase OAuth (implicit flow), then `POST /auth/google` trades the Supabase token for an app JWT and upserts the user — Google accounts share the same `users` table + JWT as email/password.
 
 ---
 
