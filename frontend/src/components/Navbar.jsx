@@ -38,14 +38,17 @@ export default function Navbar() {
               }`}>
               <LayoutDashboard size={14} /> Dashboard
             </Link>
-            <Link to="/upload"
-              className={`flex items-center gap-1.5 text-sm px-3 py-2 transition-colors ${
-                isActive('/upload')
-                  ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/30 font-medium'
-                  : 'text-ink-600 dark:text-gray-400 hover:text-ink-900 dark:hover:text-white hover:bg-ink-50 dark:hover:bg-gray-800'
-              }`}>
-              <Upload size={14} /> New Review
-            </Link>
+            {/* Dashboard already has its own "New Review" CTA — hide the duplicate here. */}
+            {!isActive('/dashboard') && (
+              <Link to="/upload"
+                className={`flex items-center gap-1.5 text-sm px-3 py-2 transition-colors ${
+                  isActive('/upload')
+                    ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/30 font-medium'
+                    : 'text-ink-600 dark:text-gray-400 hover:text-ink-900 dark:hover:text-white hover:bg-ink-50 dark:hover:bg-gray-800'
+                }`}>
+                <Upload size={14} /> New Review
+              </Link>
+            )}
 
             <Link to="/projects"
               className={`flex items-center gap-1.5 text-sm px-3 py-2 transition-colors ${

@@ -1,15 +1,49 @@
+import re
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
+from supabase import create_client
+from config import settings
 from models.supabase_client import get_supabase
 from utils.auth import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# Name = letters only (plus space, hyphen, apostrophe, dot). No digits allowed —
+# stops junk names like "1234" being used as a display identity.
+_NAME_RE = re.compile(r"^[A-Za-z][A-Za-z .'\-]*$")
+
+
+def validate_name(raw: str) -> str:
+    name = (raw or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Name required")
+    if any(ch.isdigit() for ch in name):
+        raise HTTPException(status_code=400, detail="Name cannot contain numbers")
+    if not _NAME_RE.match(name):
+        raise HTTPException(status_code=400, detail="Name may only contain letters, spaces, hyphens and apostrophes")
+    return name
+
+
+def _auth_client():
+    # Fresh client for Supabase Auth (email OTP). Kept separate from the
+    # service-role table client so verify_otp's user session never overwrites
+    # the service-role auth header used for RLS-bypassing table writes.
+    key = settings.supabase_anon_key or settings.supabase_service_key
+    return create_client(settings.supabase_url, key)
+
+
+class RequestOtpRequest(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
 
 
 class RegisterRequest(BaseModel):
     name: str
     email: EmailStr
     password: str
+    otp: str
 
 
 class LoginRequest(BaseModel):
@@ -27,14 +61,45 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 
-@router.post("/register", status_code=201)
-def register(body: RegisterRequest):
+@router.post("/request-otp")
+def request_otp(body: RequestOtpRequest):
+    """Step 1 of signup: validate input, then email a 6-digit verification code
+    using Supabase's built-in mailer (Supabase Auth email OTP)."""
+    validate_name(body.name)
+    if len(body.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
     sb = get_supabase()
     existing = sb.table("users").select("id").eq("email", body.email).execute()
     if existing.data:
         raise HTTPException(status_code=400, detail="Email already registered")
+    try:
+        _auth_client().auth.sign_in_with_otp({
+            "email": body.email,
+            "options": {"should_create_user": True},
+        })
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Could not send verification email: {e}")
+    return {"message": "Verification code sent"}
+
+
+@router.post("/register", status_code=201)
+def register(body: RegisterRequest):
+    """Step 2 of signup: verify the emailed OTP, then create the account."""
+    name = validate_name(body.name)
+    sb = get_supabase()
+    existing = sb.table("users").select("id").eq("email", body.email).execute()
+    if existing.data:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    try:
+        _auth_client().auth.verify_otp({
+            "email": body.email,
+            "token": body.otp.strip(),
+            "type": "email",
+        })
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid or expired verification code")
     result = sb.table("users").insert({
-        "name": body.name,
+        "name": name,
         "email": body.email,
         "password_hash": hash_password(body.password),
     }).execute()
@@ -66,7 +131,7 @@ def update_profile(body: UpdateProfileRequest, current_user: dict = Depends(get_
     sb = get_supabase()
     updates = {}
     if body.name:
-        updates["name"] = body.name
+        updates["name"] = validate_name(body.name)
     if body.avatar_url is not None:
         updates["avatar_url"] = body.avatar_url
     if not updates:
