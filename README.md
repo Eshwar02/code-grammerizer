@@ -1,6 +1,6 @@
 <p align="center"><img src="assets/cg-logo.svg" alt="code-grammerizer" width="360"></p>
 
-<p align="center"><sub>The wordmark rests collapsed as <code>&lt;c-g/&gt;</code> and expands to <code>&lt;code-grammerizer/&gt;</code> on hover in the app. GitHub Markdown strips CSS <code>:hover</code>, so the SVG above auto-plays the same collapse/expand as a loop. The live, interactive version lives in the app navbar (and standalone in <a href="cg-logo.html"><code>cg-logo.html</code></a>). Logo typeface: <b>Nunito</b> — scoped to the logo only, used nowhere else in the UI.</sub></p>
+<p align="center"><sub>In the app the wordmark rests collapsed as <code>&lt;c-g/&gt;</code> and expands to <code>&lt;code-grammerizer/&gt;</code> on hover. GitHub proxies README images and strips animation/CSS <code>:hover</code>, so it shows static here — the live, interactive version lives in the app navbar (and standalone in <a href="cg-logo.html"><code>cg-logo.html</code></a>). Logo typeface: <b>Nunito</b> — scoped to the logo only, used nowhere else in the UI.</sub></p>
 
 <div align="center">
 

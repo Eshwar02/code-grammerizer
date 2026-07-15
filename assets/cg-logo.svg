@@ -1,79 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="316" height="60" viewBox="0 0 316 60" role="img" aria-label="code-grammerizer">
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="60" viewBox="0 0 360 60" role="img" aria-label="code-grammerizer">
   <title>code-grammerizer</title>
 
-  <!-- ===========================================================
-       Animated wordmark for the code-grammerizer logo.
-
-       Rest state (collapsed):  <c g/>   -> shows "<", "c", "g", "/>"
-       Expanded state (full):   <code-grammerizer/>
-
-       The hidden segments "ode-" (after c) and "rammerizer"
-       (after g) fade + slide in, while the trailing "g" and "/>"
-       groups shift right so nothing overlaps. Loops forever.
-
-       Cycle (~4.2s): collapsed 1s -> expand 0.6s ->
-                      hold full 1.8s -> collapse 0.6s -> repeat.
-       =========================================================== -->
+  <!-- Static wordmark for the README.
+       GitHub proxies README images through camo, which strips SMIL/CSS
+       animation, so this renders the full brand statically instead of an
+       animation that would freeze mid-frame. The live collapse->expand
+       hover animation lives in the app navbar and in cg-logo.html. -->
 
   <!-- Background pill: light so dark ink letters read in GitHub dark mode -->
-  <rect x="1" y="10" width="314" height="40" rx="12" ry="12" fill="#F2F0EA"/>
+  <rect x="1" y="10" width="358" height="40" rx="12" ry="12" fill="#F2F0EA"/>
 
-  <g font-family="Nunito, system-ui, sans-serif" font-weight="800" font-size="30"
-     text-anchor="start" dominant-baseline="alphabetic" style="letter-spacing:0.2px">
-
-    <!-- Baseline for all text -->
-    <!-- x positions are hand-tuned for Nunito 800 @30px -->
-
-    <!-- Opening bracket "<" (green, fixed) -->
-    <text x="16" y="40" fill="#0F7B1F">&lt;</text>
-
-    <!-- Anchor letter "c" (fixed) -->
-    <text x="32" y="40" fill="#14110E">c</text>
-
-    <!-- Hidden segment 1: "ode-"  ("-" green). Fades + slides in. -->
-    <g opacity="0">
-      <animate attributeName="opacity" values="0;0;1;1;0"
-               keyTimes="0;0.238;0.381;0.809;0.952"
-               dur="4.2s" repeatCount="indefinite"/>
-      <animateTransform attributeName="transform" type="translate"
-               values="-8 0;-8 0;0 0;0 0;-8 0"
-               keyTimes="0;0.238;0.381;0.809;0.952"
-               dur="4.2s" repeatCount="indefinite"/>
-      <text x="49" y="40" fill="#14110E">ode</text>
-      <text x="98" y="40" fill="#0F7B1F">-</text>
-    </g>
-
-    <!-- Anchor letter "g". Collapsed: sits right after "c".
-         Expanded: shifts right to sit after "code-". -->
-    <g transform="translate(0,0)">
-      <animateTransform attributeName="transform" type="translate"
-               values="0 0;0 0;62 0;62 0;0 0"
-               keyTimes="0;0.238;0.381;0.809;0.952"
-               dur="4.2s" repeatCount="indefinite"/>
-      <text x="49" y="40" fill="#14110E">g</text>
-    </g>
-
-    <!-- Hidden segment 2: "rammerizer" (dark). Fades + slides in.
-         Positioned after the expanded "g" (which lands at x=111). -->
-    <g opacity="0">
-      <animate attributeName="opacity" values="0;0;1;1;0"
-               keyTimes="0;0.238;0.381;0.809;0.952"
-               dur="4.2s" repeatCount="indefinite"/>
-      <animateTransform attributeName="transform" type="translate"
-               values="-8 0;-8 0;0 0;0 0;-8 0"
-               keyTimes="0;0.238;0.381;0.809;0.952"
-               dur="4.2s" repeatCount="indefinite"/>
-      <text x="128" y="40" fill="#14110E" font-size="29" style="letter-spacing:-0.3px">rammerizer</text>
-    </g>
-
-    <!-- Closing slash "/>" (green). Collapsed: after "g".
-         Expanded: shifts right past the full word. -->
-    <g transform="translate(0,0)">
-      <animateTransform attributeName="transform" type="translate"
-               values="0 0;0 0;208 0;208 0;0 0"
-               keyTimes="0;0.238;0.381;0.809;0.952"
-               dur="4.2s" repeatCount="indefinite"/>
-      <text x="67" y="40" fill="#0F7B1F">/&gt;</text>
-    </g>
-  </g>
+  <text x="180" y="39" text-anchor="middle"
+        font-family="Nunito, system-ui, sans-serif" font-weight="800" font-size="26"
+        style="letter-spacing:0.2px">
+    <tspan fill="#0F7B1F">&lt;</tspan><tspan fill="#14110E">code</tspan><tspan fill="#0F7B1F">-</tspan><tspan fill="#14110E">grammerizer</tspan><tspan fill="#0F7B1F">/&gt;</tspan>
+  </text>
 </svg>
