@@ -15,6 +15,21 @@ Catch bugs, security holes, and complexity in seconds — then fix them *togethe
 [![AI](https://img.shields.io/badge/AI-Multi--Provider-FF6B6B?style=for-the-badge&logo=lightning)](#-multi-provider-ai--model-routing)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#-license)
 
+<br/>
+
+### 🧰 Tech Stack
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Yjs](https://img.shields.io/badge/Yjs_CRDT-2C2C2C?style=for-the-badge&logo=y-combinator&logoColor=white)
+![Monaco](https://img.shields.io/badge/Monaco_Editor-0078D4?style=for-the-badge&logo=visualstudiocode&logoColor=white)
+
 </div>
 
 ## 👋 What is Code-Grammerizer?
