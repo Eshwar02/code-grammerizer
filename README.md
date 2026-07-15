@@ -14,11 +14,8 @@ Catch bugs, security holes, and complexity in seconds — then fix them *togethe
 [![Database](https://img.shields.io/badge/Database-Supabase-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
 [![AI](https://img.shields.io/badge/AI-Multi--Provider-FF6B6B?style=for-the-badge&logo=lightning)](#-multi-provider-ai--model-routing)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#-license)
-
-<br/>
-
-### 🧰 Tech Stack
-
+<br>
+<br>
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
