@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
-import { LayoutDashboard, Upload, LogOut, Code2, User, ChevronDown, Moon, Sun, Users, FolderGit2 } from 'lucide-react'
+import { LayoutDashboard, Upload, LogOut, User, ChevronDown, Moon, Sun, Users, FolderGit2 } from 'lucide-react'
+import CGLogo from './CGLogo'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
@@ -23,11 +24,8 @@ export default function Navbar() {
   return (
     <nav className="bg-white dark:bg-gray-900 border-b border-ink-200 dark:border-gray-700 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-blue-400 flex items-center justify-center">
-            <Code2 size={14} className="text-white" />
-          </div>
-          <span className="font-bold text-ink-900 dark:text-white tracking-tight">Code-Grammerizer</span>
+        <Link to="/" className="flex items-center">
+          <CGLogo />
         </Link>
 
         {user && (
