@@ -16,10 +16,22 @@ export default function OAuthCallback() {
   useEffect(() => {
     if (ran.current) return
     ran.current = true
+    // The Supabase session may not be parsed from the URL on the very first
+    // tick, so wait for it: try getSession, else listen for the SIGNED_IN event.
+    const getSession = () => new Promise((resolve) => {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session?.access_token) return resolve(data.session)
+        const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+          if (session?.access_token) { sub.subscription.unsubscribe(); resolve(session) }
+        })
+        setTimeout(() => { sub.subscription.unsubscribe(); resolve(null) }, 5000)
+      })
+    })
+
     ;(async () => {
       try {
         if (!supabase) throw new Error('Google login is not configured')
-        const { data: { session } } = await supabase.auth.getSession()
+        const session = await getSession()
         if (!session?.access_token) throw new Error('No Google session')
         const { data } = await authApi.google({ access_token: session.access_token })
         await supabase.auth.signOut()

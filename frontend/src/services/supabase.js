@@ -10,9 +10,18 @@ const anon = import.meta.env.VITE_SUPABASE_ANON_KEY
 // at import time — it throws "supabaseUrl is required", which would white-screen
 // the entire app (Login imports this module). Instead leave Google login
 // gracefully disabled until the vars are configured.
+// implicit flow: tokens arrive in the URL hash after the Google redirect, so we
+// don't depend on a PKCE code_verifier surviving the full-page reload (it
+// wouldn't, since we don't persist the session). We immediately trade the token
+// for our own JWT and sign the Supabase session out, so implicit is fine here.
 export const supabase = url && anon
   ? createClient(url, anon, {
-      auth: { detectSessionInUrl: true, persistSession: false, autoRefreshToken: false },
+      auth: {
+        detectSessionInUrl: true,
+        persistSession: false,
+        autoRefreshToken: false,
+        flowType: 'implicit',
+      },
     })
   : null
 
