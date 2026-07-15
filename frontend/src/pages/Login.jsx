@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi } from '../services/api'
+import GoogleButton from '../components/GoogleButton'
 import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff, Code2, Zap, ShieldCheck } from 'lucide-react'
@@ -133,6 +134,13 @@ export default function Login() {
               ) : 'Sign In'}
             </button>
           </form>
+
+          <div className="flex items-center gap-3 my-5">
+            <div className="h-px flex-1 bg-ink-200" />
+            <span className="text-xs text-ink-400">or</span>
+            <div className="h-px flex-1 bg-ink-200" />
+          </div>
+          <GoogleButton label="Continue with Google" />
 
           <div className="mt-6 pt-6 border-t border-ink-200 text-center">
             <p className="text-sm text-ink-400">

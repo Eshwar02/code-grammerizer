@@ -33,6 +33,10 @@ def _auth_client():
     return create_client(settings.supabase_url, key)
 
 
+class GoogleAuthRequest(BaseModel):
+    access_token: str
+
+
 class RequestOtpRequest(BaseModel):
     name: str
     email: EmailStr
@@ -104,6 +108,41 @@ def register(body: RegisterRequest):
         "password_hash": hash_password(body.password),
     }).execute()
     user = result.data[0]
+    token = create_access_token(user["id"])
+    return {"token": token, "user": {"id": user["id"], "name": user["name"], "email": user["email"]}}
+
+
+@router.post("/google")
+def google_auth(body: GoogleAuthRequest):
+    """Sign in / sign up with Google. Frontend runs Supabase OAuth and sends us
+    the resulting Supabase access token; we validate it, then upsert the user in
+    our own users table and hand back an app JWT (same shape as login)."""
+    import secrets
+
+    try:
+        guser = _auth_client().auth.get_user(body.access_token).user
+    except Exception:
+        guser = None
+    if not guser or not getattr(guser, "email", None):
+        raise HTTPException(status_code=401, detail="Invalid Google session")
+
+    email = guser.email
+    meta = getattr(guser, "user_metadata", None) or {}
+    # Google display names can carry digits; strip to honour the letters-only rule.
+    raw_name = meta.get("full_name") or meta.get("name") or email.split("@")[0]
+    name = re.sub(r"[0-9]", "", raw_name).strip() or email.split("@")[0]
+    avatar = meta.get("avatar_url") or meta.get("picture")
+
+    sb = get_supabase()
+    existing = sb.table("users").select("*").eq("email", email).execute()
+    if existing.data:
+        user = existing.data[0]
+    else:
+        row = {"name": name, "email": email, "password_hash": hash_password(secrets.token_urlsafe(32))}
+        if avatar:
+            row["avatar_url"] = avatar
+        user = sb.table("users").insert(row).execute().data[0]
+
     token = create_access_token(user["id"])
     return {"token": token, "user": {"id": user["id"], "name": user["name"], "email": user["email"]}}
 

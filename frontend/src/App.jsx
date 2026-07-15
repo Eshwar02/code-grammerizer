@@ -16,6 +16,7 @@ import Profile from './pages/Profile'
 import Workspaces from './pages/Workspaces'
 import WorkspaceDetail from './pages/WorkspaceDetail'
 import JoinWorkspace from './pages/JoinWorkspace'
+import OAuthCallback from './pages/OAuthCallback'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
           <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
