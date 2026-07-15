@@ -18,6 +18,7 @@ export default function OAuthCallback() {
     ran.current = true
     ;(async () => {
       try {
+        if (!supabase) throw new Error('Google login is not configured')
         const { data: { session } } = await supabase.auth.getSession()
         if (!session?.access_token) throw new Error('No Google session')
         const { data } = await authApi.google({ access_token: session.access_token })
