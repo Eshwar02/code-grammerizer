@@ -106,6 +106,8 @@ Code review is slow, solo, and disconnected from where code actually gets writte
 
 ### 🔐 Secure by Default
 - JWT auth
+- **Email OTP verification** on signup (Supabase built-in mailer)
+- Names are letters-only — no junk numeric identities
 - **Row-Level Security** on every table
 - Backend-only `service_role` access; anon key locked out
 - Per-workspace membership enforced server-side
@@ -282,7 +284,7 @@ code-grammerizer/
 │   │   ├── 002_collab.sql         # Workspaces, members, invites, files, change log
 │   │   └── 003_project_files.sql  # Multi-file projects (Git repo pull)
 │   ├── routes/
-│   │   ├── auth.py                # Register, login, profile, stats
+│   │   ├── auth.py                # Register (email OTP), login, profile, stats
 │   │   ├── review.py · report.py · lint.py · suggest.py
 │   │   ├── upload.py              # Uploads + Git repo pull → multi-file project + files list
 │   │   ├── workspace.py           # Workspaces, membership, invites, files, repo import, change log
