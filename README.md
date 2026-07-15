@@ -102,7 +102,7 @@ Code review is slow, solo, and disconnected from where code actually gets writte
 <td>
 
 ### 🔐 Secure by Default
-- JWT auth
+- JWT auth + **Google sign-in** (Supabase OAuth)
 - **Email OTP verification** on signup (Supabase built-in mailer)
 - Names are letters-only — no junk numeric identities
 - **Row-Level Security** on every table
