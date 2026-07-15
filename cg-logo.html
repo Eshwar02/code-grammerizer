@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>code-grammerizer — logo demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee+Inline&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c-red:    #F94144;
+    --c-pink:   #FF5D8F;
+    --c-blue:   #2D5BFF;
+    --c-peach:  #FFB4A2;
+    --c-teal:   #00A896;
+    --c-yellow: #FFD60A;
+    --c-purple: #7B5CFF;
+    --ink: #0A0A0A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #111;
+    min-height: 100vh;
+    font-family: 'Bungee Inline', sans-serif;
+  }
+
+  /* ---- Navbar (demo context) ---- */
+  .navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background: var(--ink);
+    border-bottom: 4px solid var(--c-yellow);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 24px;
+  }
+  .nav-links a {
+    color: #eee;
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+  .nav-links a:hover { color: var(--c-yellow); }
+
+  /* ---- The logo ---- */
+  .cg-logo {
+    display: inline-flex;
+    align-items: baseline;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 400;
+    font-size: 26px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .cg-logo .ch {
+    display: inline-block;
+  }
+
+  /* bracket + slash characters */
+  .cg-logo .sym { color: #0F7B1F; }
+
+  /* every visible letter gets its own funky color */
+  .cg-logo .k1 { color: var(--c-red); }
+  .cg-logo .k2 { color: var(--c-pink); }
+  .cg-logo .k3 { color: var(--c-blue); }
+  .cg-logo .k4 { color: var(--c-peach); }
+  .cg-logo .k5 { color: var(--c-teal); }
+  .cg-logo .k6 { color: var(--c-yellow); }
+  .cg-logo .k7 { color: var(--c-purple); }
+
+  /* expandable segments: hidden by default, grow on hover */
+  .cg-logo .expand {
+    display: inline-flex;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transform: translateY(2px);
+    transition:
+      max-width 0.55s cubic-bezier(0.65, 0, 0.35, 1),
+      opacity   0.35s ease 0.08s,
+      transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .cg-logo:hover .expand,
+  .cg-logo:focus-visible .expand {
+    max-width: 340px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* little pop on the anchor letters when expanding */
+  .cg-logo .anchor {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .cg-logo:hover .anchor {
+    transform: scale(1.08);
+  }
+
+  /* colored underline bars beneath each letter — nod to the bar artwork */
+  .cg-logo .word {
+    display: inline-flex;
+    align-items: baseline;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cg-logo .expand,
+    .cg-logo .anchor {
+      transition: none;
+    }
+  }
+
+  /* ---- demo helper text ---- */
+  .demo-hint {
+    color: #666;
+    font-size: 12px;
+    padding: 40px 28px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="cg-logo" href="#" aria-label="code-grammerizer home">
+    <span class="ch sym">&lt;</span><span class="word"><span class="ch k1 anchor">c</span><span class="expand"><span class="ch k2">o</span><span class="ch k3">d</span><span class="ch k4">e</span><span class="ch sym">-</span></span><span class="ch k5 anchor">g</span><span class="expand"><span class="ch k6">r</span><span class="ch k7">a</span><span class="ch k1">m</span><span class="ch k2">m</span><span class="ch k3">e</span><span class="ch k4">r</span><span class="ch k5">i</span><span class="ch k6">z</span><span class="ch k7">e</span><span class="ch k1">r</span></span></span><span class="ch sym">/&gt;</span>
+  </a>
+
+  <div class="nav-links">
+    <a href="#">analyze</a>
+    <a href="#">docs</a>
+    <a href="#">about</a>
+  </div>
+</nav>
+
+<p class="demo-hint">hover (or keyboard-focus) the logo in the navbar &uarr;</p>
+
+</body>
+</html>

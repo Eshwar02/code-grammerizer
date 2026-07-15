@@ -1,9 +1,29 @@
 import os
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import auth, upload, review, report, lint, suggest, workspace, collab
+from models.supabase_client import get_supabase
 
-app = FastAPI(title="Code-Grammerizer", version="1.0.0")
+log = logging.getLogger("uvicorn")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Warm the Supabase client (TLS handshake + HTTP/2 pool) and prime the
+    # connection with a tiny query before the first user request. On free-tier
+    # hosts the container cold-starts after idle; doing this here means the DB
+    # round-trip is already paid for by the time someone opens the dashboard.
+    try:
+        get_supabase().table("projects").select("id").limit(1).execute()
+        log.info("Supabase connection warmed on startup")
+    except Exception as e:  # never block boot on a warm-up failure
+        log.warning("Supabase warm-up skipped: %s", e)
+    yield
+
+
+app = FastAPI(title="Code-Grammerizer", version="1.0.0", lifespan=lifespan)
 
 # Allow localhost in dev + any configured frontend URL in prod
 _allowed = ["http://localhost:5173", "http://localhost:3000"]
