@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi } from '../services/api'
+import GoogleButton from '../components/GoogleButton'
 import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff, Code2, Check, X } from 'lucide-react'
@@ -214,6 +215,13 @@ export default function Register() {
                 </span>
               ) : 'Create Account'}
             </button>
+
+            <div className="flex items-center gap-3 pt-1">
+              <div className="h-px flex-1 bg-ink-200" />
+              <span className="text-xs text-ink-400">or</span>
+              <div className="h-px flex-1 bg-ink-200" />
+            </div>
+            <GoogleButton label="Sign up with Google" />
           </form>
           ) : (
           <form onSubmit={handleVerify} className="space-y-4">
