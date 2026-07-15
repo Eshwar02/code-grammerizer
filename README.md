@@ -1,7 +1,3 @@
-<p align="center"><img src="assets/cg-logo.svg" alt="code-grammerizer" width="360"></p>
-
-<p align="center"><sub>In the app the wordmark rests collapsed as <code>&lt;c-g/&gt;</code> and expands to <code>&lt;code-grammerizer/&gt;</code> on hover. GitHub proxies README images and strips animation/CSS <code>:hover</code>, so it shows static here — the live, interactive version lives in the app navbar (and standalone in <a href="cg-logo.html"><code>cg-logo.html</code></a>). Logo typeface: <b>Nunito</b> — scoped to the logo only, used nowhere else in the UI.</sub></p>
-
 <div align="center">
 
 <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=32&pause=1000&color=4361EE&center=true&vCenter=true&width=650&lines=Code-Grammerizer+%F0%9F%A7%A0;AI+Code+Review+%2B+Live+Collaboration;Analyze.+Collaborate.+Ship." alt="Typing SVG" />
